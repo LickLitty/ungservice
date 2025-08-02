@@ -53,6 +53,53 @@ const NotificationDropdown: React.FC = () => {
     }
   };
 
+  const getNotificationDescription = (notification: any) => {
+    switch (notification.type) {
+      case 'new-message':
+        return {
+          title: notification.title,
+          subtitle: 'Ny melding mottatt',
+          description: notification.message,
+          action: 'Klikk for å svare'
+        };
+      case 'job-request':
+        return {
+          title: notification.title,
+          subtitle: 'Ny jobbsøknad',
+          description: notification.message,
+          action: 'Se søknad'
+        };
+      case 'application-accepted':
+        return {
+          title: notification.title,
+          subtitle: 'Søknad godkjent!',
+          description: notification.message,
+          action: 'Se jobb'
+        };
+      case 'application-rejected':
+        return {
+          title: notification.title,
+          subtitle: 'Søknad ikke godkjent',
+          description: notification.message,
+          action: 'Se andre jobber'
+        };
+      case 'job-reminder':
+        return {
+          title: notification.title,
+          subtitle: 'Jobb starter snart',
+          description: notification.message,
+          action: 'Se detaljer'
+        };
+      default:
+        return {
+          title: notification.title,
+          subtitle: 'Varsel',
+          description: notification.message,
+          action: 'Se mer'
+        };
+    }
+  };
+
   const handleNotificationClick = async (notification: any) => {
     if (!notification.isRead) {
       await markAsRead(notification.id);
@@ -64,8 +111,20 @@ const NotificationDropdown: React.FC = () => {
       // Navigate to conversation
       window.location.href = `/messages?conversation=${notification.data.conversationId}`;
     } else if (notification.data?.jobId) {
-      // Navigate to job
-      window.location.href = `/jobs/${notification.data.jobId}`;
+      // Navigate based on notification type
+      if (notification.type === 'job-request') {
+        // For job applications, go to applications page
+        window.location.href = `/jobs/applications`;
+      } else if (notification.type === 'application-accepted' || notification.type === 'application-rejected') {
+        // For application status, go to job search to see other jobs
+        window.location.href = `/jobs/search`;
+      } else if (notification.type === 'job-reminder') {
+        // For job reminders, go to dashboard
+        window.location.href = `/dashboard`;
+      } else {
+        // Default to job details
+        window.location.href = `/jobs/${notification.data.jobId}`;
+      }
     }
   };
 
@@ -107,42 +166,53 @@ const NotificationDropdown: React.FC = () => {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.isRead ? 'bg-blue-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-lg ${getNotificationColor(notification.type)}`}>
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className={`text-sm font-medium ${
-                            !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
-                            {notification.title}
-                          </p>
-                          {!notification.isRead && (
-                            <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                          )}
+                {notifications.map((notification) => {
+                  const desc = getNotificationDescription(notification);
+                  return (
+                    <div
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                        !notification.isRead ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={`p-2 rounded-lg ${getNotificationColor(notification.type)}`}>
+                          {getNotificationIcon(notification.type)}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-2">
-                          {formatDistanceToNow(notification.createdAt, { 
-                            addSuffix: true, 
-                            locale: nb 
-                          })}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className={`text-sm font-medium ${
+                              !notification.isRead ? 'text-gray-900' : 'text-gray-700'
+                            }`}>
+                              {desc.title}
+                            </p>
+                            {!notification.isRead && (
+                              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {desc.subtitle}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                            {desc.description}
+                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-xs text-gray-400">
+                              {formatDistanceToNow(notification.createdAt, { 
+                                addSuffix: true, 
+                                locale: nb 
+                              })}
+                            </p>
+                            <span className="text-xs text-primary-600 font-medium">
+                              {desc.action}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

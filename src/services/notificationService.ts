@@ -95,7 +95,7 @@ export class NotificationService {
       userId: recipientId,
       type: 'new-message',
       title: `Ny melding fra ${senderName}`,
-      message: messagePreview,
+      message: messagePreview.length > 50 ? `${messagePreview.substring(0, 50)}...` : messagePreview,
       data: { conversationId },
       isRead: false,
     });
@@ -112,7 +112,7 @@ export class NotificationService {
       userId: employerId,
       type: 'job-request',
       title: `Ny søknad på "${jobTitle}"`,
-      message: `${workerName} har søkt på jobben din`,
+      message: `${workerName} er interessert i å hjelpe deg med jobben. Klikk for å se søknaden og ta en beslutning.`,
       data: { jobId, workerName },
       isRead: false,
     });
@@ -130,8 +130,8 @@ export class NotificationService {
       ? `Søknad godkjent!` 
       : `Søknad ikke godkjent`;
     const message = status === 'accepted'
-      ? `Din søknad på "${jobTitle}" ble godkjent!`
-      : `Din søknad på "${jobTitle}" ble ikke godkjent.`;
+      ? `Gratulerer! Din søknad på "${jobTitle}" ble godkjent. Kontakt arbeidsgiveren for å avtale detaljer.`
+      : `Din søknad på "${jobTitle}" ble ikke godkjent denne gangen. Ikke gi opp - det finnes mange andre jobber!`;
 
     await this.createNotification({
       userId: workerId,
@@ -154,7 +154,7 @@ export class NotificationService {
       userId,
       type: 'job-reminder',
       title: `Påminnelse: ${jobTitle}`,
-      message: `Jobben starter om 1 time (${jobDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })})`,
+      message: `Jobben starter om 1 time (${jobDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}). Husk å være forberedt og ha med nødvendig utstyr.`,
       data: { jobId, jobDate },
       isRead: false,
     });
