@@ -3,22 +3,11 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  MapPin, 
-  Plus,
-  X,
-  Hammer,
-  RefreshCw,
-  Car,
-  Wrench
-} from 'lucide-react';
 import toast from 'react-hot-toast';
-import { JobCategory, JobType, PriceType, JobRequirements } from '../../types';
+import { JobCategory, JobType, PriceType } from '../../types';
 
-const schema = yup.object({
+// Dynamic schema based on price type
+const createSchema = (priceType: PriceType) => yup.object({
   title: yup.string().min(5, 'Tittel må være minst 5 tegn').required('Tittel er påkrevd'),
   description: yup.string().min(20, 'Beskrivelse må være minst 20 tegn').required('Beskrivelse er påkrevd'),
   categories: yup.array().min(1, 'Velg minst én kategori').required('Kategori er påkrevd'),
@@ -29,11 +18,13 @@ const schema = yup.object({
   date: yup.date().min(new Date(), 'Dato må være i fremtiden').required('Dato er påkrevd'),
   time: yup.string().required('Tidspunkt er påkrevd'),
   duration: yup.number().min(0.5, 'Varighet må være minst 0.5 timer').max(24, 'Varighet kan ikke være mer enn 24 timer').required('Varighet er påkrevd'),
-  wage: yup.number().min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd'),
+  wage: priceType === 'hourly' 
+    ? yup.number().min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd')
+    : yup.number().min(100, 'Pris må være minst 100 kr').max(10000, 'Pris kan ikke være mer enn 10 000 kr').required('Pris er påkrevd'),
   address: yup.string().min(5, 'Adresse må være minst 5 tegn').required('Adresse er påkrevd'),
 }).required();
 
-type FormData = yup.InferType<typeof schema>;
+type FormData = yup.InferType<ReturnType<typeof createSchema>>;
 
 const categories: { value: JobCategory; label: string; icon: string }[] = [
   { value: 'grass-cutting', label: 'Klippe gress', icon: '🌿' },
@@ -65,6 +56,8 @@ const CreateJobForm: React.FC = () => {
   const [selectedPriceType, setSelectedPriceType] = useState<PriceType>('hourly');
   const [carRequired, setCarRequired] = useState<boolean>(false);
   const [equipmentRequired, setEquipmentRequired] = useState<'yes' | 'some' | 'no'>('no');
+
+  const schema = createSchema(selectedPriceType);
 
   const {
     register,
@@ -141,344 +134,338 @@ const CreateJobForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="card">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Publiser ny jobb</h2>
-          <button
-            onClick={() => window.history.back()}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              Tittel *
-            </label>
-            <input
-              {...register('title')}
-              type="text"
-              id="title"
-              className="input-field"
-              placeholder="F.eks. Hjelp med hagearbeid"
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
-            )}
-          </div>
-
-          {/* Category Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Kategorier *
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category.value}
-                  type="button"
-                  onClick={() => handleCategorySelect(category.value)}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    selectedCategories.includes(category.value)
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="text-xl mb-1">{category.icon}</div>
-                  <div className="text-xs font-medium">{category.label}</div>
-                </button>
-              ))}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Publiser ny jobb</h1>
+          
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Title */}
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                Tittel *
+              </label>
+              <input
+                {...register('title')}
+                type="text"
+                id="title"
+                className="input-field"
+                placeholder="F.eks. Klippe gress i hagen"
+              />
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+              )}
             </div>
-            {errors.categories && (
-              <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
-            )}
-          </div>
 
-          {/* Job Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Type jobb *
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleJobTypeSelect('one-time')}
-                className={`p-4 border rounded-lg text-center transition-colors ${
-                  selectedJobType === 'one-time'
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-2xl mb-2">🔨</div>
-                <div className="text-sm font-medium">Engangsjobb</div>
-                <div className="text-xs text-gray-500">Enkelt oppdrag</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleJobTypeSelect('recurring')}
-                className={`p-4 border rounded-lg text-center transition-colors ${
-                  selectedJobType === 'recurring'
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-2xl mb-2">🔄</div>
-                <div className="text-sm font-medium">Gjentakende jobb</div>
-                <div className="text-xs text-gray-500">Regelmessig arbeid</div>
-              </button>
+            {/* Categories */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Kategorier *
+              </label>
+              <div className="grid grid-cols-4 gap-3">
+                {categories.map((category) => (
+                  <button
+                    key={category.value}
+                    type="button"
+                    onClick={() => handleCategorySelect(category.value)}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      selectedCategories.includes(category.value)
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{category.icon}</div>
+                    <div className="text-xs font-medium">{category.label}</div>
+                  </button>
+                ))}
+              </div>
+              {errors.categories && (
+                <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
+              )}
             </div>
-            {errors.jobType && (
-              <p className="text-red-500 text-sm mt-1">{errors.jobType.message}</p>
-            )}
-          </div>
 
-          {/* Price Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Prisetype *
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handlePriceTypeSelect('hourly')}
-                className={`p-4 border rounded-lg text-center transition-colors ${
-                  selectedPriceType === 'hourly'
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-2xl mb-2">⏰</div>
-                <div className="text-sm font-medium">Timebetalt</div>
-                <div className="text-xs text-gray-500">Per time</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePriceTypeSelect('fixed')}
-                className={`p-4 border rounded-lg text-center transition-colors ${
-                  selectedPriceType === 'fixed'
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-2xl mb-2">💰</div>
-                <div className="text-sm font-medium">Fastpris</div>
-                <div className="text-xs text-gray-500">Fast beløp</div>
-              </button>
-            </div>
-            {errors.priceType && (
-              <p className="text-red-500 text-sm mt-1">{errors.priceType.message}</p>
-            )}
-          </div>
-
-          {/* Job Requirements */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Jobbkrav *
-            </label>
-            
-            {/* Car Required */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bil kreves
+            {/* Job Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Type jobb *
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleCarRequiredSelect(true)}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    carRequired === true
+                  onClick={() => handleJobTypeSelect('one-time')}
+                  className={`p-4 border rounded-lg text-center transition-colors ${
+                    selectedJobType === 'one-time'
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  <div className="text-lg mb-1">🚗</div>
-                  <div className="text-sm font-medium">Ja</div>
+                  <div className="text-2xl mb-2">🔨</div>
+                  <div className="text-sm font-medium">Engangsjobb</div>
+                  <div className="text-xs text-gray-500">Enkelt oppdrag</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleCarRequiredSelect(false)}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    carRequired === false
+                  onClick={() => handleJobTypeSelect('recurring')}
+                  className={`p-4 border rounded-lg text-center transition-colors ${
+                    selectedJobType === 'recurring'
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  <div className="text-lg mb-1">❌</div>
-                  <div className="text-sm font-medium">Nei</div>
+                  <div className="text-2xl mb-2">🔄</div>
+                  <div className="text-sm font-medium">Gjentakende jobb</div>
+                  <div className="text-xs text-gray-500">Regelmessig arbeid</div>
                 </button>
+              </div>
+              {errors.jobType && (
+                <p className="text-red-500 text-sm mt-1">{errors.jobType.message}</p>
+              )}
+            </div>
+
+            {/* Price Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Prisetype *
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handlePriceTypeSelect('hourly')}
+                  className={`p-4 border rounded-lg text-center transition-colors ${
+                    selectedPriceType === 'hourly'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">⏰</div>
+                  <div className="text-sm font-medium">Timebetalt</div>
+                  <div className="text-xs text-gray-500">Per time</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePriceTypeSelect('fixed')}
+                  className={`p-4 border rounded-lg text-center transition-colors ${
+                    selectedPriceType === 'fixed'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">💰</div>
+                  <div className="text-sm font-medium">Fastpris</div>
+                  <div className="text-xs text-gray-500">Fast beløp</div>
+                </button>
+              </div>
+              {errors.priceType && (
+                <p className="text-red-500 text-sm mt-1">{errors.priceType.message}</p>
+              )}
+            </div>
+
+            {/* Job Requirements */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Jobbkrav *
+              </label>
+              
+              {/* Car Required */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bil kreves
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleCarRequiredSelect(true)}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      carRequired === true
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">🚗</div>
+                    <div className="text-sm font-medium">Ja</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCarRequiredSelect(false)}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      carRequired === false
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">❌</div>
+                    <div className="text-sm font-medium">Nei</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Equipment Required */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Utstyr kreves
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleEquipmentRequiredSelect('yes')}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      equipmentRequired === 'yes'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">🔧</div>
+                    <div className="text-sm font-medium">Ja</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleEquipmentRequiredSelect('some')}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      equipmentRequired === 'some'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">⚠️</div>
+                    <div className="text-sm font-medium">Deler</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleEquipmentRequiredSelect('no')}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      equipmentRequired === 'no'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">❌</div>
+                    <div className="text-sm font-medium">Nei</div>
+                  </button>
+                </div>
+              </div>
+              
+              {(errors.carRequired || errors.equipmentRequired) && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.carRequired?.message || errors.equipmentRequired?.message}
+                </p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                Beskrivelse
+              </label>
+              <textarea
+                {...register('description')}
+                id="description"
+                rows={4}
+                className="input-field"
+                placeholder="Beskriv jobben i detalj. Hva skal gjøres? Er verktøy tilgjengelig? Spesielle krav?"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+              )}
+            </div>
+
+            {/* Date and Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+                  Dato *
+                </label>
+                <input
+                  {...register('date')}
+                  type="date"
+                  id="date"
+                  className="input-field"
+                />
+                {errors.date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                  Tidspunkt *
+                </label>
+                <input
+                  {...register('time')}
+                  type="time"
+                  id="time"
+                  className="input-field"
+                />
+                {errors.time && (
+                  <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
+                )}
               </div>
             </div>
 
-            {/* Equipment Required */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Utstyr kreves
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleEquipmentRequiredSelect('yes')}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    equipmentRequired === 'yes'
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="text-lg mb-1">🔧</div>
-                  <div className="text-sm font-medium">Ja</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleEquipmentRequiredSelect('some')}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    equipmentRequired === 'some'
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="text-lg mb-1">🔨</div>
-                  <div className="text-sm font-medium">Noe utstyr</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleEquipmentRequiredSelect('no')}
-                  className={`p-3 border rounded-lg text-center transition-colors ${
-                    equipmentRequired === 'no'
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="text-lg mb-1">❌</div>
-                  <div className="text-sm font-medium">Nei</div>
-                </button>
+            {/* Duration and Wage */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
+                  Varighet (timer) *
+                </label>
+                <input
+                  {...register('duration', { valueAsNumber: true })}
+                  type="number"
+                  id="duration"
+                  step="0.5"
+                  min="0.5"
+                  max="24"
+                  className="input-field"
+                  placeholder="2.5"
+                />
+                {errors.duration && (
+                  <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
+                  {selectedPriceType === 'hourly' ? 'Lønn (kr/timen) *' : 'Pris (kr) *'}
+                </label>
+                <input
+                  {...register('wage', { valueAsNumber: true })}
+                  type="number"
+                  id="wage"
+                  min={selectedPriceType === 'hourly' ? 50 : 100}
+                  max={selectedPriceType === 'hourly' ? 1000 : 10000}
+                  className="input-field"
+                  placeholder={selectedPriceType === 'hourly' ? '150' : '500'}
+                />
+                {errors.wage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
+                )}
               </div>
             </div>
-            
-            {(errors.carRequired || errors.equipmentRequired) && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.carRequired?.message || errors.equipmentRequired?.message}
-              </p>
-            )}
-          </div>
 
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Beskrivelse
-            </label>
-            <textarea
-              {...register('description')}
-              id="description"
-              rows={4}
-              className="input-field"
-              placeholder="Beskriv jobben i detalj. Hva skal gjøres? Er verktøy tilgjengelig? Spesielle krav?"
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
-            )}
-          </div>
-
-          {/* Date and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Address */}
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Dato *
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                Adresse *
               </label>
               <input
-                {...register('date')}
-                type="date"
-                id="date"
+                {...register('address')}
+                type="text"
+                id="address"
                 className="input-field"
+                placeholder="F.eks. Storgata 1, Oslo"
               />
-              {errors.date && (
-                <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
               )}
             </div>
-            <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                Tidspunkt *
-              </label>
-              <input
-                {...register('time')}
-                type="time"
-                id="time"
-                className="input-field"
-              />
-              {errors.time && (
-                <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
-              )}
-            </div>
-          </div>
 
-          {/* Duration and Wage */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                Varighet (timer) *
-              </label>
-              <input
-                {...register('duration', { valueAsNumber: true })}
-                type="number"
-                id="duration"
-                step="0.5"
-                min="0.5"
-                max="24"
-                className="input-field"
-                placeholder="2.5"
-              />
-              {errors.duration && (
-                <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                Lønn (kr/timen) *
-              </label>
-              <input
-                {...register('wage', { valueAsNumber: true })}
-                type="number"
-                id="wage"
-                min="50"
-                max="1000"
-                className="input-field"
-                placeholder="150"
-              />
-              {errors.wage && (
-                <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Address */}
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse *
-            </label>
-            <input
-              {...register('address')}
-              type="text"
-              id="address"
-              className="input-field"
-              placeholder="F.eks. Storgata 1, Oslo"
-            />
-            {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full btn-primary"
-          >
-            {isLoading ? 'Publiserer...' : 'Publiser jobb'}
-          </button>
-        </form>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary"
+            >
+              {isLoading ? 'Publiserer...' : 'Publiser jobb'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
