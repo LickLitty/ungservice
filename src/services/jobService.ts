@@ -54,23 +54,27 @@ export class JobService {
     try {
       console.log('Applying for job:', jobId, 'by worker:', workerId);
       
+      if (!jobId || !workerId) {
+        throw new Error('Manglende jobb ID eller bruker ID');
+      }
+      
       // Get job details
       const jobDoc = await getDoc(doc(db, 'jobs', jobId));
       if (!jobDoc.exists()) {
-        throw new Error('Job not found');
+        throw new Error('Jobb ikke funnet');
       }
       
-      const job = jobDoc.data() as Job;
-      console.log('Job found:', job.title);
+      const jobData = jobDoc.data();
+      console.log('Job found:', jobData.title);
       
       // Get worker details
       const workerDoc = await getDoc(doc(db, 'users', workerId));
       if (!workerDoc.exists()) {
-        throw new Error('Worker not found');
+        throw new Error('Bruker ikke funnet');
       }
       
-      const worker = workerDoc.data() as User;
-      console.log('Worker found:', worker.displayName);
+      const workerData = workerDoc.data();
+      console.log('Worker found:', workerData.displayName);
 
       // Check if user has already applied
       const hasApplied = await this.hasUserApplied(jobId, workerId);
@@ -78,8 +82,29 @@ export class JobService {
         throw new Error('Du har allerede søkt på denne jobben');
       }
 
+      // Create worker object with proper structure
+      const worker: User = {
+        id: workerDoc.id,
+        email: workerData.email || '',
+        displayName: workerData.displayName || 'Ukjent bruker',
+        photoURL: workerData.photoURL,
+        role: workerData.role || 'worker',
+        bio: workerData.bio,
+        phone: workerData.phone,
+        age: workerData.age,
+        address: workerData.address,
+        city: workerData.city,
+        experience: workerData.experience,
+        skills: workerData.skills || [],
+        location: workerData.location,
+        rating: workerData.rating || 0,
+        completedJobs: workerData.completedJobs || 0,
+        createdAt: workerData.createdAt?.toDate() || new Date(),
+        isEmailVerified: workerData.isEmailVerified || false,
+      };
+
       // Create application
-      const applicationData: Omit<JobApplication, 'id' | 'createdAt'> = {
+      const applicationData = {
         jobId,
         workerId,
         worker,
@@ -98,16 +123,16 @@ export class JobService {
 
       // Update job with new applicant
       await updateDoc(doc(db, 'jobs', jobId), {
-        applicants: [...(job.applicants || []), workerId],
+        applicants: [...(jobData.applicants || []), workerId],
         updatedAt: serverTimestamp(),
       });
 
       // Send notification to employer
       try {
         await NotificationService.notifyJobApplication(
-          job.employerId,
+          jobData.employerId,
           worker.displayName,
-          job.title,
+          jobData.title,
           jobId
         );
         console.log('Notification sent to employer');

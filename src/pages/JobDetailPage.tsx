@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
-import { NotificationService } from '../services/notificationService';
+
 import { Job } from '../types';
 import { 
   ArrowLeft, 
@@ -72,18 +72,18 @@ const JobDetailPage: React.FC = () => {
     try {
       await JobService.applyForJob(job.id, currentUser.id, 'Jeg er interessert i denne jobben');
       
-      // Send notification to employer
-      await NotificationService.notifyJobApplication(
-        job.employerId,
-        currentUser.displayName,
-        job.title,
-        job.id
-      );
-
       setApplicationStatus('pending');
-      toast.success('Søknad sendt!');
+      toast.success('Søknad sendt! Arbeidsgiveren vil bli varslet.');
     } catch (error: any) {
-      toast.error('Kunne ikke sende søknad: ' + error.message);
+      console.error('Error applying for job:', error);
+      if (error.message.includes('permissions')) {
+        toast.error('Tillatelse feilet. Prøv å logge inn på nytt.');
+      } else if (error.message.includes('allerede søkt')) {
+        toast.error('Du har allerede søkt på denne jobben');
+        setApplicationStatus('pending');
+      } else {
+        toast.error('Kunne ikke sende søknad. Prøv igjen senere.');
+      }
     } finally {
       setIsApplying(false);
     }

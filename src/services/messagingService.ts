@@ -179,11 +179,38 @@ export class MessagingService {
   // Get user data by ID
   static async getUserById(userId: string): Promise<User | null> {
     try {
+      if (!userId) {
+        console.error('No user ID provided');
+        return null;
+      }
+      
       const userDocRef = doc(db, 'users', userId);
       const userDoc = await getDoc(userDocRef);
+      
       if (userDoc.exists()) {
-        return userDoc.data() as User;
+        const userData = userDoc.data();
+        return {
+          id: userDoc.id,
+          email: userData.email || '',
+          displayName: userData.displayName || 'Ukjent bruker',
+          photoURL: userData.photoURL,
+          role: userData.role || 'worker',
+          bio: userData.bio,
+          phone: userData.phone,
+          age: userData.age,
+          address: userData.address,
+          city: userData.city,
+          experience: userData.experience,
+          skills: userData.skills || [],
+          location: userData.location,
+          rating: userData.rating || 0,
+          completedJobs: userData.completedJobs || 0,
+          createdAt: userData.createdAt?.toDate() || new Date(),
+          isEmailVerified: userData.isEmailVerified || false,
+        } as User;
       }
+      
+      console.warn('User not found:', userId);
       return null;
     } catch (error) {
       console.error('Error fetching user:', error);

@@ -91,7 +91,7 @@ const ChatSystem: React.FC = () => {
       // Get target user data
       const userData = await MessagingService.getUserById(targetUserId);
       if (!userData) {
-        toast.error('Kunne ikke finne brukeren');
+        toast.error('Kunne ikke finne brukeren. Prøv igjen senere.');
         return;
       }
       setTargetUser(userData);
@@ -105,7 +105,7 @@ const ChatSystem: React.FC = () => {
           conversationId,
           senderId: currentUser.id,
           sender: currentUser,
-          content: `Hei! Jeg er interessert i jobben din.`,
+          content: `Hei! Jeg er interessert i jobben din. Kan vi snakke mer om det?`,
           isRead: false
         };
         
@@ -128,9 +128,10 @@ const ChatSystem: React.FC = () => {
         setSelectedConversation(tempConversation);
       }
       
-      toast.success('Samtale startet!');
+      toast.success('Samtale startet! Du kan nå sende meldinger.');
     } catch (error: any) {
-      toast.error('Kunne ikke starte samtale: ' + error.message);
+      console.error('Error starting conversation:', error);
+      toast.error('Kunne ikke starte samtale. Prøv igjen senere.');
     }
   }, [currentUser, conversations]);
 

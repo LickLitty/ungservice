@@ -16,25 +16,38 @@ service cloud.firestore {
     
     // Job applications
     match /jobApplications/{applicationId} {
-      allow read, write: if request.auth != null && 
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.workerId || 
+         request.auth.uid == resource.data.employerId);
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
         (request.auth.uid == resource.data.workerId || 
          request.auth.uid == resource.data.employerId);
     }
     
     // Messages
     match /conversations/{conversationId} {
-      allow read, write: if request.auth != null && 
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
         request.auth.uid in resource.data.participants;
     }
     
     match /messages/{messageId} {
-      allow read, write: if request.auth != null && 
+      allow read: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data.participants;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
         request.auth.uid in get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data.participants;
     }
     
     // Notifications
     match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && 
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
         request.auth.uid == resource.data.userId;
     }
     

@@ -167,7 +167,14 @@ const JobCard: React.FC<JobCardProps> = ({
       toast.success('Søknad sendt! Arbeidsgiveren vil bli varslet.');
     } catch (error: any) {
       console.error('Error applying for job:', error);
-      toast.error('Kunne ikke sende søknad: ' + error.message);
+      if (error.message.includes('permissions')) {
+        toast.error('Tillatelse feilet. Prøv å logge inn på nytt.');
+      } else if (error.message.includes('allerede søkt')) {
+        toast.error('Du har allerede søkt på denne jobben');
+        setApplicationStatus('pending');
+      } else {
+        toast.error('Kunne ikke sende søknad. Prøv igjen senere.');
+      }
     } finally {
       setIsApplying(false);
     }
