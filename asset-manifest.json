@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ungservice/static/css/main.80c581ef.css",
+    "main.js": "/ungservice/static/js/main.9593309b.js",
+    "static/js/453.e19c008c.chunk.js": "/ungservice/static/js/453.e19c008c.chunk.js",
+    "index.html": "/ungservice/index.html",
+    "main.80c581ef.css.map": "/ungservice/static/css/main.80c581ef.css.map",
+    "main.9593309b.js.map": "/ungservice/static/js/main.9593309b.js.map",
+    "453.e19c008c.chunk.js.map": "/ungservice/static/js/453.e19c008c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.80c581ef.css",
+    "static/js/main.9593309b.js"
+  ]
+}
