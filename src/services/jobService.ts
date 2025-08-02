@@ -21,13 +21,27 @@ export class JobService {
     try {
       console.log('JobService.createJob called with data:', jobData);
       
-      const docRef = await addDoc(collection(db, 'jobs'), {
+      // Validate required fields before saving
+      if (!jobData.title || !jobData.description || !jobData.categories) {
+        throw new Error('Missing required fields: title, description, or categories');
+      }
+      
+      const jobToSave = {
         ...jobData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      console.log('Job data to save:', jobToSave);
+      
+      const docRef = await addDoc(collection(db, 'jobs'), jobToSave);
       
       console.log('Job created successfully with ID:', docRef.id);
+      
+      // Verify the job was saved by fetching it back
+      const savedJob = await getDoc(docRef);
+      console.log('Saved job data:', savedJob.data());
+      
       return docRef.id;
     } catch (error) {
       console.error('Error in JobService.createJob:', error);
@@ -262,14 +276,28 @@ export class JobService {
   static async getJobById(jobId: string): Promise<Job> {
     try {
       console.log('Getting job by ID:', jobId);
+      
+      if (!jobId) {
+        throw new Error('Job ID is required');
+      }
+      
       const jobDoc = await getDoc(doc(db, 'jobs', jobId));
       
+      console.log('Job document exists:', jobDoc.exists());
+      
       if (!jobDoc.exists()) {
+        console.log('Job document does not exist for ID:', jobId);
         throw new Error('Job not found');
       }
       
       const data = jobDoc.data();
       console.log('Job data retrieved:', data);
+      
+      // Validate required fields
+      if (!data.title || !data.description || !data.categories) {
+        console.error('Job data missing required fields:', data);
+        throw new Error('Job data is incomplete');
+      }
       
       const job: Job = {
         id: jobDoc.id,
