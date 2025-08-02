@@ -134,26 +134,38 @@ export class JobService {
         console.log('Job snapshot received:', snapshot.size, 'jobs');
         const jobs: Job[] = [];
         snapshot.forEach((doc) => {
-          const data = doc.data();
-          jobs.push({
-            id: doc.id,
-            title: data.title,
-            description: data.description,
-            categories: data.categories,
-            jobType: data.jobType,
-            priceType: data.priceType,
-            requirements: data.requirements,
-            location: data.location,
-            numberOfWorkers: data.numberOfWorkers,
-            expectedDuration: data.expectedDuration,
-            wage: data.wage,
-            employerId: data.employerId,
-            employer: data.employer,
-            status: data.status,
-            applicants: data.applicants || [],
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date(),
-          } as Job);
+          try {
+            const data = doc.data();
+            console.log('Processing job document:', doc.id, data);
+            
+            // Validate required fields
+            if (!data.title || !data.description || !data.categories) {
+              console.warn('Job document missing required fields:', doc.id, data);
+              return; // Skip this job
+            }
+            
+            jobs.push({
+              id: doc.id,
+              title: data.title,
+              description: data.description,
+              categories: data.categories,
+              jobType: data.jobType,
+              priceType: data.priceType,
+              requirements: data.requirements,
+              location: data.location,
+              numberOfWorkers: data.numberOfWorkers,
+              expectedDuration: data.expectedDuration,
+              wage: data.wage,
+              employerId: data.employerId,
+              employer: data.employer,
+              status: data.status,
+              applicants: data.applicants || [],
+              createdAt: data.createdAt?.toDate() || new Date(),
+              updatedAt: data.updatedAt?.toDate() || new Date(),
+            } as Job);
+          } catch (docError) {
+            console.error('Error processing job document:', doc.id, docError);
+          }
         });
         console.log('Processed jobs:', jobs.length);
         callback(jobs);
