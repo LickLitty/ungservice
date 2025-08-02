@@ -323,7 +323,9 @@ const CreateJobForm: React.FC = () => {
                   ? numberOfWorkers > 1 
                     ? `Lønn per time per arbeider *` 
                     : 'Lønn per time *'
-                  : 'Lønn *'
+                  : numberOfWorkers > 1
+                    ? `Lønn fordelt på ${numberOfWorkers} arbeidere *`
+                    : 'Lønn *'
                 }
               </label>
               <input
@@ -333,7 +335,12 @@ const CreateJobForm: React.FC = () => {
                 min={selectedPriceType === 'hourly' ? 50 : 100}
                 max={selectedPriceType === 'hourly' ? 1000 : 10000}
                 className="input-field"
-                placeholder={selectedPriceType === 'hourly' ? '150 kr/timen' : '500 kr'}
+                placeholder={selectedPriceType === 'hourly' 
+                  ? '150 kr/timen' 
+                  : numberOfWorkers > 1 
+                    ? `${500 * numberOfWorkers} kr totalt`
+                    : '500 kr'
+                }
                 value={wage || ''}
                 onChange={(e) => handleWageChange(parseFloat(e.target.value) || 0)}
               />
@@ -354,6 +361,23 @@ const CreateJobForm: React.FC = () => {
                   </div>
                   <div className="text-sm text-gray-600">
                     {expectedDuration} timer × {wage} kr/timen × {numberOfWorkers} {numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Fixed Price Total for Multiple Workers */}
+            {selectedPriceType === 'fixed' && numberOfWorkers > 1 && wage > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Total lønn fordelt
+                </label>
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <div className="text-lg font-semibold text-gray-900">
+                    {wage.toLocaleString()} kr totalt
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {Math.round(wage / numberOfWorkers).toLocaleString()} kr per {numberOfWorkers === 1 ? 'arbeider' : 'arbeider'}
                   </div>
                 </div>
               </div>
