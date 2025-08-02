@@ -303,6 +303,55 @@ export class JobService {
     return application.status;
   }
 
+  // Get applications for an employer
+  static async getApplicationsForEmployer(employerId: string): Promise<JobApplication[]> {
+    try {
+      // First get all jobs by this employer
+      const jobsQuery = query(
+        collection(db, 'jobs'),
+        where('employerId', '==', employerId)
+      );
+      const jobsSnapshot = await getDocs(jobsQuery);
+      const jobIds = jobsSnapshot.docs.map(doc => doc.id);
+
+      if (jobIds.length === 0) {
+        return [];
+      }
+
+      // Get all applications for these jobs
+      // Firestore 'in' query has a limit of 10 items, so we need to handle this
+      const applications: JobApplication[] = [];
+      
+      // Process jobIds in chunks of 10
+      for (let i = 0; i < jobIds.length; i += 10) {
+        const chunk = jobIds.slice(i, i + 10);
+        const applicationsQuery = query(
+          collection(db, 'jobApplications'),
+          where('jobId', 'in', chunk)
+        );
+        const applicationsSnapshot = await getDocs(applicationsQuery);
+        
+        for (const doc of applicationsSnapshot.docs) {
+          const data = doc.data();
+          applications.push({
+            id: doc.id,
+            jobId: data.jobId,
+            workerId: data.workerId,
+            worker: data.worker,
+            status: data.status,
+            message: data.message,
+            createdAt: data.createdAt?.toDate() || new Date(),
+          } as JobApplication);
+        }
+      }
+
+      return applications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('Error getting applications for employer:', error);
+      throw error;
+    }
+  }
+
   // Get a specific job by ID
   static async getJobById(jobId: string): Promise<Job> {
     try {

@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Message, Conversation, User } from '../../types';
 import { NotificationService } from '../../services/notificationService';
-import { Send, Paperclip, Smile } from 'lucide-react';
+import { MessagingService } from '../../services/messagingService';
+import { Send, Paperclip, Smile, User as UserIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 
 const ChatSystem: React.FC = () => {
   const { currentUser } = useAuth();
   const [searchParams] = useSearchParams();
-  const [conversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [targetUser, setTargetUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Check if we should start a conversation with a specific user
@@ -33,21 +35,15 @@ const ChatSystem: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const messageData: Message = {
-        id: `msg-${Date.now()}`,
+      const messageData = {
         conversationId: selectedConversation.id,
         senderId: currentUser.id,
         sender: currentUser,
         content: newMessage.trim(),
-        timestamp: new Date(),
         isRead: false
       };
 
-      // TODO: Save to Firestore
-      console.log('Sending message:', messageData);
-      
-      // Add to local state for immediate UI update
-      setMessages(prev => [...prev, messageData]);
+      await MessagingService.sendMessage(selectedConversation.id, messageData);
       
       // Send notification to other participant
       const otherParticipant = getOtherParticipant(selectedConversation);
@@ -85,59 +81,92 @@ const ChatSystem: React.FC = () => {
 
   const getOtherParticipant = (conversation: Conversation): User | null => {
     if (!currentUser) return null;
-    const otherId = conversation.participants.find(id => id !== currentUser.id);
-    // TODO: Fetch user data from Firestore
-    return otherId ? null : null;
+    return conversation.otherUser || null;
   };
 
-  const startNewConversation = async (targetUserId: string, jobId?: string) => {
+  const startNewConversation = useCallback(async (targetUserId: string, jobId?: string) => {
     if (!currentUser) return;
     
     try {
-      // Create a new conversation
-      const conversationId = `conv-${Date.now()}`;
-      const conversation: Conversation = {
-        id: conversationId,
-        participants: [currentUser.id, targetUserId],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      // Get target user data
+      const userData = await MessagingService.getUserById(targetUserId);
+      if (!userData) {
+        toast.error('Kunne ikke finne brukeren');
+        return;
+      }
+      setTargetUser(userData);
       
-      // TODO: Save conversation to Firestore
-      console.log('Starting new conversation:', conversation);
+      // Get or create conversation
+      const conversationId = await MessagingService.getOrCreateConversation(currentUser.id, targetUserId);
       
       // Create initial message if jobId is provided
       if (jobId) {
-        const initialMessage: Message = {
-          id: `msg-${Date.now()}`,
-          conversationId: conversationId,
+        const initialMessage = {
+          conversationId,
           senderId: currentUser.id,
           sender: currentUser,
           content: `Hei! Jeg er interessert i jobben din.`,
-          timestamp: new Date(),
           isRead: false
         };
         
-        // TODO: Save message to Firestore
-        console.log('Sending initial message:', initialMessage);
-        
-        // Add to local state
-        setMessages([initialMessage]);
+        await MessagingService.sendMessage(conversationId, initialMessage);
       }
       
-      setSelectedConversation(conversation);
+      // Find the conversation in the list or create a temporary one
+      const existingConversation = conversations.find(c => c.id === conversationId);
+      if (existingConversation) {
+        setSelectedConversation(existingConversation);
+      } else {
+        // Create temporary conversation object
+        const tempConversation: Conversation = {
+          id: conversationId,
+          participants: [currentUser.id, targetUserId],
+          otherUser: userData,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        setSelectedConversation(tempConversation);
+      }
+      
       toast.success('Samtale startet!');
     } catch (error: any) {
       toast.error('Kunne ikke starte samtale: ' + error.message);
     }
-  };
+  }, [currentUser, conversations]);
+
+  // Subscribe to conversations
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const unsubscribe = MessagingService.subscribeToConversations(currentUser.id, (conversations) => {
+      setConversations(conversations);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Subscribe to messages for selected conversation
+  useEffect(() => {
+    if (!selectedConversation) return;
+
+    const unsubscribe = MessagingService.subscribeToMessages(selectedConversation.id, (messages) => {
+      setMessages(messages);
+    });
+
+    // Mark messages as read
+    if (currentUser) {
+      MessagingService.markMessagesAsRead(selectedConversation.id, currentUser.id);
+    }
+
+    return () => unsubscribe();
+  }, [selectedConversation, currentUser]);
 
   // Auto-start conversation if targetUserId is provided
   useEffect(() => {
     if (targetUserId && currentUser && targetUserId !== currentUser.id) {
       startNewConversation(targetUserId, jobId || undefined);
     }
-  }, [targetUserId, jobId, currentUser]);
+  }, [targetUserId, jobId, currentUser, startNewConversation]);
 
   if (!currentUser) {
     return (
@@ -181,12 +210,12 @@ const ChatSystem: React.FC = () => {
                           {otherUser?.displayName || 'Ukjent bruker'}
                         </h3>
                         <p className="text-sm text-gray-500 truncate">
-                          {conversation.lastMessage?.content || 'Ingen meldinger ennå'}
+                          {conversation.lastMessage || 'Ingen meldinger ennå'}
                         </p>
                       </div>
                       <div className="text-xs text-gray-400">
-                        {conversation.lastMessage?.timestamp && 
-                          formatTime(conversation.lastMessage.timestamp)}
+                        {conversation.lastMessageTime && 
+                          formatTime(conversation.lastMessageTime)}
                       </div>
                     </div>
                   </div>
@@ -201,21 +230,27 @@ const ChatSystem: React.FC = () => {
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-primary-600 font-medium">
-                      {getOtherParticipant(selectedConversation)?.displayName?.charAt(0) || 'U'}
-                    </span>
+              <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-blue-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                      <UserIcon className="h-6 w-6 text-primary-600" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {getOtherParticipant(selectedConversation)?.displayName || 'Ukjent bruker'}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {getOtherParticipant(selectedConversation)?.role === 'worker' ? 'Arbeidstaker' : 'Arbeidsgiver'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {getOtherParticipant(selectedConversation)?.displayName || 'Ukjent bruker'}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {getOtherParticipant(selectedConversation)?.role === 'worker' ? 'Arbeidstaker' : 'Arbeidsgiver'}
-                    </p>
-                  </div>
+                  {targetUser && targetUserId && (
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">Ny samtale</p>
+                      <p className="text-xs text-primary-600 font-medium">Du kan nå sende meldinger</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

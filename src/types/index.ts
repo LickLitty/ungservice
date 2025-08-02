@@ -103,7 +103,9 @@ export interface Message {
 export interface Conversation {
   id: string;
   participants: string[]; // user IDs
-  lastMessage?: Message;
+  lastMessage?: string; // Changed from Message to string for simplicity
+  lastMessageTime?: Date;
+  otherUser?: User; // Add the other participant's user data
   createdAt: Date;
   updatedAt: Date;
 }

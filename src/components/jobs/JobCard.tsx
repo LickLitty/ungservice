@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { JobService } from '../../services/jobService';
-import { NotificationService } from '../../services/notificationService';
+
 import { Job } from '../../types';
-import { MapPin, Clock, DollarSign, User, Star, Car, Wrench } from 'lucide-react';
+import { MapPin, Clock, DollarSign, User, Star, Car, Wrench, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface JobCardProps {
@@ -275,9 +275,9 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
       </Link>
 
-      {/* Apply Button */}
-      {showApplyButton && currentUser?.role === 'worker' && (
-        <div className="mt-4 flex justify-end">
+      {/* Action Buttons */}
+      <div className="mt-4 flex justify-end space-x-2">
+        {showApplyButton && currentUser?.role === 'worker' && (
           <button
             onClick={handleApplyClick}
             disabled={isApplying || applicationStatus !== null}
@@ -298,8 +298,18 @@ const JobCard: React.FC<JobCardProps> = ({
              applicationStatus === 'accepted' ? 'Godkjent' :
              applicationStatus === 'rejected' ? 'Ikke godkjent' : 'Søk'}
           </button>
-        </div>
-      )}
+        )}
+        
+        {currentUser && currentUser.id !== job.employerId && (
+          <Link
+            to={`/messages?user=${job.employerId}&jobId=${job.id}`}
+            className="text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            <MessageCircle className="h-4 w-4 mr-1 inline" />
+            Melding
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

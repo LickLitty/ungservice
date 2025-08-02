@@ -387,7 +387,7 @@ const JobDetailPage: React.FC = () => {
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               <MessageCircle className="h-4 w-4 mr-2 inline" />
-              Send melding
+              Send melding til {job.employer.displayName}
             </button>
           </div>
         </div>
