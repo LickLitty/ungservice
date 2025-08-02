@@ -8,6 +8,7 @@ const JobsOverviewPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
 
   const loadJobs = useCallback(() => {
@@ -43,7 +44,11 @@ const JobsOverviewPage: React.FC = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesCategory = selectedCategory === 'all' || job.categories.includes(selectedCategory as JobCategory);
-    return matchesCategory;
+    const matchesSearch = searchQuery === '' || 
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.location.address.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
   });
 
   const categories = [
@@ -119,7 +124,21 @@ const JobsOverviewPage: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Search Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Søk
+            </label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Søk i jobbtittel, beskrivelse eller adresse..."
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          
           {/* Category Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">

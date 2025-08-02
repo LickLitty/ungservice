@@ -93,7 +93,7 @@ const JobDetailPage: React.FC = () => {
     if (!currentUser || !job) return;
     
     // Navigate to messages with the employer
-    navigate(`/messages?user=${job.employerId}`);
+    navigate(`/messages?user=${job.employerId}&jobId=${job.id}`);
   };
 
   const getCategoryIcon = (category: string) => {

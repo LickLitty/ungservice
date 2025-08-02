@@ -4,15 +4,21 @@ import { Message, Conversation, User } from '../../types';
 import { NotificationService } from '../../services/notificationService';
 import { Send, Paperclip, Smile } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 
 const ChatSystem: React.FC = () => {
   const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
   const [conversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Check if we should start a conversation with a specific user
+  const targetUserId = searchParams.get('user');
+  const jobId = searchParams.get('jobId');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,6 +89,56 @@ const ChatSystem: React.FC = () => {
     // TODO: Fetch user data from Firestore
     return otherId ? null : null;
   };
+
+  const startNewConversation = async (targetUserId: string, jobId?: string) => {
+    if (!currentUser) return;
+    
+    try {
+      // Create a new conversation
+      const conversationId = `conv-${Date.now()}`;
+      const conversation: Conversation = {
+        id: conversationId,
+        participants: [currentUser.id, targetUserId],
+        lastMessage: jobId ? `Hei! Jeg er interessert i jobben din.` : 'Hei!',
+        lastMessageTime: new Date(),
+        createdAt: new Date()
+      };
+      
+      // TODO: Save conversation to Firestore
+      console.log('Starting new conversation:', conversation);
+      
+      // Create initial message if jobId is provided
+      if (jobId) {
+        const initialMessage: Message = {
+          id: `msg-${Date.now()}`,
+          conversationId: conversationId,
+          senderId: currentUser.id,
+          sender: currentUser,
+          content: `Hei! Jeg er interessert i jobben din.`,
+          timestamp: new Date(),
+          isRead: false
+        };
+        
+        // TODO: Save message to Firestore
+        console.log('Sending initial message:', initialMessage);
+        
+        // Add to local state
+        setMessages([initialMessage]);
+      }
+      
+      setSelectedConversation(conversation);
+      toast.success('Samtale startet!');
+    } catch (error: any) {
+      toast.error('Kunne ikke starte samtale: ' + error.message);
+    }
+  };
+
+  // Auto-start conversation if targetUserId is provided
+  useEffect(() => {
+    if (targetUserId && currentUser && targetUserId !== currentUser.id) {
+      startNewConversation(targetUserId, jobId || undefined);
+    }
+  }, [targetUserId, jobId, currentUser]);
 
   if (!currentUser) {
     return (
