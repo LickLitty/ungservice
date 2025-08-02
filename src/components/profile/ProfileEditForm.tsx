@@ -13,6 +13,7 @@ interface ProfileEditFormProps {
 const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ user, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     displayName: user.displayName || '',
+    email: user.email || '',
     bio: user.bio || '',
     age: user.age || '',
     city: user.city || '',
@@ -55,6 +56,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ user, onSave, onCance
     try {
       const updatedUser: Partial<User> = {
         displayName: formData.displayName,
+        email: formData.email,
         bio: formData.bio,
         age: formData.age ? parseInt(formData.age.toString()) : undefined,
         city: formData.city,
@@ -103,6 +105,22 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ user, onSave, onCance
             />
           </div>
 
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              E-post *
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
               Alder

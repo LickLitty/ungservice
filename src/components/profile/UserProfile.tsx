@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewService } from '../../services/reviewService';
-import { User as UserType, Review, Job } from '../../types';
-import { Star, MapPin, Calendar, Clock, DollarSign, Briefcase, Edit, User } from 'lucide-react';
+import { JobService } from '../../services/jobService';
+import { UserService } from '../../services/userService';
+import { User as UserType, Review, Job, JobApplication } from '../../types';
+import { Star, MapPin, Calendar, Clock, DollarSign, Briefcase, Edit, User, Mail, Phone, MapPin as MapPinIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -19,18 +21,30 @@ const UserProfile: React.FC = () => {
     totalReviews: number;
     ratingDistribution: { [key: number]: number };
   } | null>(null);
-  const [completedJobs] = useState<Job[]>([]);
+  const [completedJobs, setCompletedJobs] = useState<Job[]>([]);
+  const [myJobs, setMyJobs] = useState<Job[]>([]);
+  const [myApplications, setMyApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'jobs'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'jobs' | 'my-jobs' | 'my-applications'>('overview');
   const [isEditing, setIsEditing] = useState(false);
 
   const loadUserProfile = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Load user data (you'll need to implement this)
-      // const userData = await getUserById(userId);
-      // setUser(userData);
+      // Load user data
+      const userData = await UserService.getUserById(userId!);
+      if (userData) {
+        setUser(userData);
+      } else {
+        // If user not found, use current user if viewing own profile
+        if (currentUser && currentUser.id === userId) {
+          setUser(currentUser);
+        } else {
+          toast.error('Bruker ikke funnet');
+          return;
+        }
+      }
 
       // Load reviews
       const unsubscribe = ReviewService.subscribeToUserReviews(userId!, (newReviews) => {
@@ -41,9 +55,32 @@ const UserProfile: React.FC = () => {
       const stats = await ReviewService.getUserReviewStats(userId!);
       setReviewStats(stats);
 
-      // Load completed jobs (you'll need to implement this)
-      // const jobs = await getCompletedJobsByUser(userId);
-      // setCompletedJobs(jobs);
+      // Load completed jobs
+      const completedJobsData = await JobService.getCompletedJobs(userId!);
+      setCompletedJobs(completedJobsData);
+
+      // Load user's own jobs if viewing own profile
+      if (currentUser && currentUser.id === userId) {
+        // Subscribe to user's jobs
+        const jobsUnsubscribe = JobService.subscribeToJobs((jobs) => {
+          const userJobs = jobs.filter(job => job.employerId === userId);
+          setMyJobs(userJobs);
+        });
+
+        // Load user's applications based on role
+        if (currentUser.role === 'employer') {
+          const applications = await JobService.getApplicationsForEmployer(userId);
+          setMyApplications(applications);
+        } else {
+          const applications = await JobService.getApplicationsByWorker(userId);
+          setMyApplications(applications);
+        }
+
+        return () => {
+          unsubscribe();
+          jobsUnsubscribe();
+        };
+      }
 
       return unsubscribe;
     } catch (error) {
@@ -52,7 +89,7 @@ const UserProfile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, currentUser]);
 
   useEffect(() => {
     if (userId) {
@@ -64,10 +101,13 @@ const UserProfile: React.FC = () => {
     if (!currentUser) return;
     
     try {
-      // Update user profile
-      // await updateUserProfile(currentUser.id, updatedUser);
+      // Update user profile in Firestore
+      await UserService.updateUserProfile(currentUser.id, updatedUser);
+      
+      // Update local state
       setUser(prev => prev ? { ...prev, ...updatedUser } : null);
       setIsEditing(false);
+      toast.success('Profil oppdatert!');
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;
@@ -212,9 +252,16 @@ const UserProfile: React.FC = () => {
             )}
 
             {/* Personal Information */}
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center text-gray-600">
+                <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                <span className="text-sm font-medium w-20">E-post:</span>
+                <span className="text-sm">{user.email}</span>
+              </div>
+              
               {user.age && (
                 <div className="flex items-center text-gray-600">
+                  <User className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-sm font-medium w-20">Alder:</span>
                   <span className="text-sm">{user.age} år</span>
                 </div>
@@ -222,6 +269,7 @@ const UserProfile: React.FC = () => {
               
               {user.city && (
                 <div className="flex items-center text-gray-600">
+                  <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-sm font-medium w-20">By:</span>
                   <span className="text-sm">{user.city}</span>
                 </div>
@@ -229,6 +277,7 @@ const UserProfile: React.FC = () => {
               
               {user.address && (
                 <div className="flex items-center text-gray-600">
+                  <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-sm font-medium w-20">Adresse:</span>
                   <span className="text-sm">{user.address}</span>
                 </div>
@@ -236,6 +285,7 @@ const UserProfile: React.FC = () => {
               
               {user.phone && (
                 <div className="flex items-center text-gray-600">
+                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-sm font-medium w-20">Telefon:</span>
                   <span className="text-sm">{user.phone}</span>
                 </div>
@@ -243,6 +293,7 @@ const UserProfile: React.FC = () => {
               
               {user.experience && (
                 <div className="flex items-start text-gray-600">
+                  <Briefcase className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
                   <span className="text-sm font-medium w-20">Erfaring:</span>
                   <span className="text-sm">{user.experience}</span>
                 </div>
@@ -250,6 +301,7 @@ const UserProfile: React.FC = () => {
               
               {user.skills && user.skills.length > 0 && (
                 <div className="flex items-start text-gray-600">
+                  <Star className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
                   <span className="text-sm font-medium w-20">Ferdigheter:</span>
                   <div className="flex flex-wrap gap-1">
                     {user.skills.map((skill, index) => (
@@ -284,10 +336,10 @@ const UserProfile: React.FC = () => {
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow-lg">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex space-x-8 px-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -297,7 +349,7 @@ const UserProfile: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'reviews'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -307,7 +359,7 @@ const UserProfile: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('jobs')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'jobs'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -315,6 +367,30 @@ const UserProfile: React.FC = () => {
             >
               Tidligere oppdrag ({completedJobs.length})
             </button>
+            {currentUser && currentUser.id === user.id && (
+              <>
+                <button
+                  onClick={() => setActiveTab('my-jobs')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'my-jobs'
+                      ? 'border-primary-500 text-primary-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Mine jobber ({myJobs.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('my-applications')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'my-applications'
+                      ? 'border-primary-500 text-primary-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Mine søknader ({myApplications.length})
+                </button>
+              </>
+            )}
           </nav>
         </div>
 
@@ -457,6 +533,106 @@ const UserProfile: React.FC = () => {
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'my-jobs' && (
+            <div className="space-y-4">
+              {myJobs.length === 0 ? (
+                <div className="text-center py-8">
+                  <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Ingen jobber publisert</h3>
+                  <p className="text-gray-500">Du har ikke publisert noen jobber ennå.</p>
+                </div>
+              ) : (
+                myJobs.map((job) => (
+                  <div key={job.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-900">{job.title}</h4>
+                        <p className="text-sm text-gray-600">{job.description}</p>
+                        <div className="flex items-center mt-2 space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {job.expectedDuration} timer
+                          </div>
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 mr-1" />
+                            {job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}
+                          </div>
+                          <div className="flex items-center">
+                            <DollarSign className="h-4 w-4 mr-1" />
+                            {job.priceType === 'hourly' ? `${job.wage} kr/time` : `${job.wage} kr`}
+                          </div>
+                          <div className="flex items-center">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              job.status === 'open' ? 'bg-green-100 text-green-800' :
+                              job.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {job.status === 'open' ? 'Åpen' : 
+                               job.status === 'in-progress' ? 'Pågående' : 'Fullført'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'my-applications' && (
+            <div className="space-y-4">
+              {myApplications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {currentUser?.role === 'employer' ? 'Ingen søknader mottatt' : 'Ingen søknader sendt'}
+                  </h3>
+                  <p className="text-gray-500">
+                    {currentUser?.role === 'employer' 
+                      ? 'Du har ikke mottatt noen søknader på dine jobber ennå.' 
+                      : 'Du har ikke søkt på noen jobber ennå.'}
+                  </p>
+                </div>
+              ) : (
+                myApplications.map((application) => {
+                  // For workers, show job title. For employers, show worker name
+                  const isWorker = currentUser?.role === 'worker';
+                  const title = isWorker 
+                    ? `Søknad til: ${application.jobId}` // We'll need to get job title
+                    : `Søknad fra: ${application.worker?.displayName || 'Ukjent bruker'}`;
+                  
+                  return (
+                    <div key={application.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-medium text-gray-900">{title}</h4>
+                          <p className="text-sm text-gray-600">{application.message}</p>
+                          <div className="flex items-center mt-2 space-x-4 text-sm text-gray-500">
+                            <div className="flex items-center">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                application.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                application.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {application.status === 'pending' ? 'Venter' : 
+                                 application.status === 'accepted' ? 'Godkjent' : 'Avvist'}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              {formatDistanceToNow(application.createdAt, { addSuffix: true, locale: nb })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           )}

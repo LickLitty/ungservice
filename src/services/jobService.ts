@@ -377,6 +377,37 @@ export class JobService {
     }
   }
 
+  // Get applications sent by a worker
+  static async getApplicationsByWorker(workerId: string): Promise<JobApplication[]> {
+    try {
+      const applicationsQuery = query(
+        collection(db, 'jobApplications'),
+        where('workerId', '==', workerId),
+        orderBy('createdAt', 'desc')
+      );
+      const applicationsSnapshot = await getDocs(applicationsQuery);
+      
+      const applications: JobApplication[] = [];
+      for (const doc of applicationsSnapshot.docs) {
+        const data = doc.data();
+        applications.push({
+          id: doc.id,
+          jobId: data.jobId,
+          workerId: data.workerId,
+          worker: data.worker,
+          status: data.status,
+          message: data.message,
+          createdAt: data.createdAt?.toDate() || new Date(),
+        } as JobApplication);
+      }
+
+      return applications;
+    } catch (error) {
+      console.error('Error getting applications by worker:', error);
+      throw error;
+    }
+  }
+
   // Get a specific job by ID
   static async getJobById(jobId: string): Promise<Job> {
     try {
