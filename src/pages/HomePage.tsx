@@ -4,14 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import JobCard from '../components/jobs/JobCard';
 import { Job } from '../types';
 import { 
-  Search, 
   Plus, 
   TrendingUp, 
   Star, 
   Users,
   Briefcase,
-  Calendar,
-  Filter
+  Calendar
 } from 'lucide-react';
 
 // Dummy data for demonstration
@@ -189,8 +187,6 @@ const dummyJobs: Job[] = [
 const HomePage: React.FC = () => {
   const { currentUser } = useAuth();
   const [featuredJobs] = useState<Job[]>(dummyJobs);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const handleApply = (jobId: string) => {
     if (!currentUser) {
@@ -202,14 +198,6 @@ const HomePage: React.FC = () => {
     console.log('Applying for job:', jobId);
   };
 
-  const filteredJobs = featuredJobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.location.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
   const stats = [
     { label: 'Aktive jobber', value: '127', icon: Briefcase },
     { label: 'Registrerte brukere', value: '1,234', icon: Users },
@@ -217,15 +205,7 @@ const HomePage: React.FC = () => {
     { label: 'Gjennomsnittlig rating', value: '4.7', icon: Star },
   ];
 
-  const categories = [
-    { value: 'all', label: 'Alle kategorier' },
-    { value: 'grass-cutting', label: 'Gressklipping' },
-    { value: 'snow-shoveling', label: 'Snømåking' },
-    { value: 'gardening', label: 'Hagearbeid' },
-    { value: 'cleaning', label: 'Rydding' },
-    { value: 'painting', label: 'Maling' },
-    { value: 'moving', label: 'Flytting' },
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -239,20 +219,6 @@ const HomePage: React.FC = () => {
             <p className="text-xl md:text-2xl mb-8 text-primary-100">
               Koble sammen arbeidsgivere og ungdom for enklere hagearbeid, snømåking og mer
             </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  placeholder="Søk etter jobber, steder eller kategorier..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-                />
-              </div>
-            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {currentUser ? (
@@ -267,11 +233,11 @@ const HomePage: React.FC = () => {
                     </Link>
                   ) : (
                     <Link
-                      to="/jobs/search"
+                      to="/dashboard"
                       className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
                     >
-                      <Search className="mr-2 h-5 w-5" />
-                      Søk jobber
+                      <TrendingUp className="mr-2 h-5 w-5" />
+                      Se jobber
                     </Link>
                   )}
                 </>
@@ -318,49 +284,25 @@ const HomePage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h2 className="text-3xl font-bold text-gray-900">Aktuelle jobber</h2>
           
-          {/* Filter */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="h-5 w-5 text-gray-500" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <Link
-              to="/jobs/search"
-              className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
-            >
-              Se alle jobber
-              <TrendingUp className="ml-1 h-4 w-4" />
-            </Link>
-          </div>
+          <Link
+            to="/dashboard"
+            className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
+          >
+            Se alle jobber
+            <TrendingUp className="ml-1 h-4 w-4" />
+          </Link>
         </div>
 
-        {filteredJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Ingen jobber funnet med de valgte filtrene.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                showApplyButton={true}
-                onApply={handleApply}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredJobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              showApplyButton={true}
+              onApply={handleApply}
+            />
+          ))}
+        </div>
       </div>
 
       {/* How it works */}

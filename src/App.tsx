@@ -13,7 +13,6 @@ import DashboardPage from './pages/DashboardPage';
 import ChatSystem from './components/messages/ChatSystem';
 import UserProfile from './components/profile/UserProfile';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
-import JobSearchPage from './pages/JobSearchPage';
 import JobApplicationsPage from './pages/JobApplicationsPage';
 import JobDetailPage from './pages/JobDetailPage';
 
@@ -160,10 +159,6 @@ const AppContent: React.FC = () => {
                 <NotificationSettingsPage />
               </ProtectedRoute>
             } 
-          />
-          <Route 
-            path="/jobs/search" 
-            element={<JobSearchPage />} 
           />
           <Route 
             path="/jobs/applications" 

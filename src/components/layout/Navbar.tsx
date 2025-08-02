@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 import { 
   Home, 
-  Search, 
   Plus, 
   MessageCircle, 
   User, 
@@ -41,7 +40,6 @@ const Navbar: React.FC = () => {
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
     { name: 'Publiser jobb', href: '/jobs/new', icon: Plus },
     { name: 'Søknader', href: '/jobs/applications', icon: FileText },
-    { name: 'Søk jobber', href: '/jobs/search', icon: Search },
     { name: 'Meldinger', href: '/messages', icon: MessageCircle },
   ];
 
