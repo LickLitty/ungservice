@@ -1,15 +1,22 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import LoginForm from './components/auth/LoginForm';
 import SignUpForm from './components/auth/SignUpForm';
+import EmailVerification from './components/auth/EmailVerification';
+import CreateJobForm from './components/jobs/CreateJobForm';
+import DashboardPage from './pages/DashboardPage';
+import ChatSystem from './components/messages/ChatSystem';
+import UserProfile from './components/profile/UserProfile';
+import NotificationSettingsPage from './pages/NotificationSettingsPage';
 
-// Protected Route Component
+// Protected Route Component - only for actions that require login
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, firebaseUser, loading } = useAuth();
   
   if (loading) {
     return (
@@ -19,12 +26,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     );
   }
   
-  return currentUser ? <>{children}</> : <Navigate to="/login" />;
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+
+  // Check if email is verified for certain routes
+  if (firebaseUser && !firebaseUser.emailVerified) {
+    return <Navigate to="/verify-email" />;
+  }
+  
+  return <>{children}</>;
 };
 
 // Auth Route Component (redirects if already logged in)
 const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, firebaseUser, loading } = useAuth();
   
   if (loading) {
     return (
@@ -34,16 +50,18 @@ const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
   
-  return currentUser ? <Navigate to="/" /> : <>{children}</>;
+  if (currentUser && firebaseUser?.emailVerified) {
+    return <Navigate to="/" />;
+  }
+  
+  return <>{children}</>;
 };
 
-// Layout Component
+// Layout Component - always show navbar
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser } = useAuth();
-  
   return (
     <div className="min-h-screen bg-gray-50">
-      {currentUser && <Navbar />}
+      <Navbar />
       <main>{children}</main>
     </div>
   );
@@ -59,6 +77,12 @@ const LoginPage: React.FC = () => (
 const SignUpPage: React.FC = () => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <SignUpForm />
+  </div>
+);
+
+const EmailVerificationPage: React.FC = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <EmailVerification />
   </div>
 );
 
@@ -85,7 +109,55 @@ const AppContent: React.FC = () => {
               </AuthRoute>
             } 
           />
-          {/* Add more routes here as we build them */}
+          <Route 
+            path="/verify-email" 
+            element={<EmailVerificationPage />} 
+          />
+          {/* Protected routes for actions that require login */}
+          <Route 
+            path="/jobs/new" 
+            element={
+              <ProtectedRoute>
+                <CreateJobForm />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/messages" 
+            element={
+              <ProtectedRoute>
+                <ChatSystem />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile/:userId" 
+            element={<UserProfile />} 
+          />
+          <Route 
+            path="/notifications/settings" 
+            element={
+              <ProtectedRoute>
+                <NotificationSettingsPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>
@@ -96,31 +168,33 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppContent />
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#10B981',
-              secondary: '#fff',
+      <NotificationProvider>
+        <AppContent />
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
             },
-          },
-          error: {
-            duration: 5000,
-            iconTheme: {
-              primary: '#EF4444',
-              secondary: '#fff',
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10B981',
+                secondary: '#fff',
+              },
             },
-          },
-        }}
-      />
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#EF4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+      </NotificationProvider>
     </AuthProvider>
   );
 };

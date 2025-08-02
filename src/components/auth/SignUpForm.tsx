@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
-import { Mail, Lock, Eye, EyeOff, User, Briefcase, UserCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const schema = yup.object({
@@ -11,7 +11,6 @@ const schema = yup.object({
   email: yup.string().email('Ugyldig e-post').required('E-post er påkrevd'),
   password: yup.string().min(6, 'Passord må være minst 6 tegn').required('Passord er påkrevd'),
   confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passordene må være like').required('Bekreft passord er påkrevd'),
-  role: yup.string().oneOf(['employer', 'worker'], 'Velg en rolle').required('Rolle er påkrevd'),
 }).required();
 
 type FormData = yup.InferType<typeof schema>;
@@ -26,17 +25,15 @@ const SignUpForm: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
 
-  const selectedRole = watch('role');
-
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.displayName, data.role as 'employer' | 'worker');
+      // Default to 'worker' role - users can change this later in their profile
+      await signUp(data.email, data.password, data.displayName, 'worker');
       toast.success('Konto opprettet! Sjekk e-posten din for verifisering.');
     } catch (error: any) {
       toast.error(error.message || 'Registrering feilet');
@@ -49,6 +46,17 @@ const SignUpForm: React.FC = () => {
     <div className="max-w-md mx-auto">
       <div className="card">
         <h2 className="text-2xl font-bold text-center mb-6">Opprett konto</h2>
+        
+        {/* Email verification notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="font-medium text-blue-900 mb-2 flex items-center">
+            <Mail className="h-4 w-4 mr-2" />
+            E-post verifisering
+          </h3>
+          <p className="text-sm text-blue-800">
+            Etter registrering får du en verifiserings-e-post. <strong>Sjekk søppelpost/spam-mappen</strong> hvis du ikke finner den i hovedinnboksen.
+          </p>
+        </div>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -141,54 +149,10 @@ const SignUpForm: React.FC = () => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Jeg vil være:
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
-                selectedRole === 'employer' ? 'border-primary-500 ring-2 ring-primary-500' : 'border-gray-300'
-              }`}>
-                <input
-                  {...register('role')}
-                  type="radio"
-                  value="employer"
-                  className="sr-only"
-                />
-                <div className="flex flex-1">
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <Briefcase className="h-5 w-5 text-primary-600" />
-                      <span className="ml-2 font-medium">Arbeidsgiver</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">Publiser jobber og finn hjelp</p>
-                  </div>
-                </div>
-              </label>
-
-              <label className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
-                selectedRole === 'worker' ? 'border-primary-500 ring-2 ring-primary-500' : 'border-gray-300'
-              }`}>
-                <input
-                  {...register('role')}
-                  type="radio"
-                  value="worker"
-                  className="sr-only"
-                />
-                <div className="flex flex-1">
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <UserCheck className="h-5 w-5 text-primary-600" />
-                      <span className="ml-2 font-medium">Arbeidstaker</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">Finn jobber og tjene penger</p>
-                  </div>
-                </div>
-              </label>
-            </div>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
-            )}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Tips:</strong> Du kan endre din rolle (arbeidsgiver/arbeidstaker) senere i profilinnstillingene.
+            </p>
           </div>
 
           <button
@@ -199,6 +163,15 @@ const SignUpForm: React.FC = () => {
             {isLoading ? 'Oppretter konto...' : 'Opprett konto'}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Har du allerede en konto?{' '}
+            <a href="/#/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              Logg inn her
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

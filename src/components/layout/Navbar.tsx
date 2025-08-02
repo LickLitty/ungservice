@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
 import { 
   Home, 
   Search, 
   Plus, 
   MessageCircle, 
-  Bell, 
   User, 
   LogOut, 
   Settings,
   Menu,
-  X
+  X,
+  LogIn,
+  BarChart3
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -23,7 +25,7 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -32,9 +34,16 @@ const Navbar: React.FC = () => {
   const navigation = [
     { name: 'Hjem', href: '/', icon: Home },
     { name: 'Søk jobber', href: '/jobs', icon: Search },
-    ...(currentUser?.role === 'employer' ? [{ name: 'Publiser jobb', href: '/jobs/new', icon: Plus }] : []),
+  ];
+
+  const authenticatedNavigation = [
+    ...navigation,
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+    { name: 'Publiser jobb', href: '/jobs/new', icon: Plus },
     { name: 'Meldinger', href: '/messages', icon: MessageCircle },
   ];
+
+  const currentNavigation = currentUser ? authenticatedNavigation : navigation;
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -48,7 +57,7 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
+            {currentNavigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
@@ -61,14 +70,11 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <button className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors">
-              <Bell className="h-6 w-6" />
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
-            </button>
+            {/* Notifications - only show if logged in */}
+            {currentUser && <NotificationDropdown />}
 
-            {/* User Menu */}
-            {currentUser && (
+            {/* User Menu or Login Button */}
+            {currentUser ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -101,12 +107,12 @@ const Navbar: React.FC = () => {
                       Min profil
                     </Link>
                     <Link
-                      to="/settings"
+                      to="/notifications/settings"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <Settings className="h-4 w-4 mr-3" />
-                      Innstillinger
+                      Varselinnstillinger
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -117,6 +123,22 @@ const Navbar: React.FC = () => {
                     </button>
                   </div>
                 )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                >
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Logg inn
+                </Link>
+                <Link
+                  to="/signup"
+                  className="btn-primary text-sm"
+                >
+                  Registrer deg
+                </Link>
               </div>
             )}
 
@@ -135,7 +157,7 @@ const Navbar: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
-            {navigation.map((item) => (
+            {currentNavigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
@@ -146,6 +168,28 @@ const Navbar: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            {!currentUser && (
+              <>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <Link
+                    to="/login"
+                    className="flex items-center text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5 mr-3" />
+                    Logg inn
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="flex items-center text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5 mr-3" />
+                    Registrer deg
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

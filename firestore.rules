@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Jobs can be read by everyone, but only created by authenticated users
+    match /jobs/{jobId} {
+      allow read: if true; // Anyone can read jobs
+      allow create: if request.auth != null; // Only authenticated users can create
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.employerId; // Only job creator can edit
+    }
+    
+    // Job applications
+    match /jobApplications/{applicationId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.workerId || 
+         request.auth.uid == resource.data.employerId);
+    }
+    
+    // Messages
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+    }
+    
+    match /messages/{messageId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data.participants;
+    }
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Reviews
+    match /reviews/{reviewId} {
+      allow read: if true; // Anyone can read reviews
+      allow create: if request.auth != null; // Only authenticated users can create
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.reviewerId; // Only reviewer can edit
+    }
+  }
+} 

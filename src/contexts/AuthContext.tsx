@@ -34,12 +34,34 @@ export const useAuth = () => {
   return context;
 };
 
+// Mock authentication for testing without Firebase
+const MOCK_MODE = false; // Set to false when you have real Firebase config
+
+const createMockUser = (email: string, displayName: string, role: 'employer' | 'worker'): User => ({
+  id: `mock-${Date.now()}`,
+  email,
+  displayName,
+  role,
+  rating: 0,
+  completedJobs: 0,
+  createdAt: new Date(),
+  isEmailVerified: true,
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const signUp = async (email: string, password: string, displayName: string, role: 'employer' | 'worker') => {
+    if (MOCK_MODE) {
+      // Mock signup
+      const mockUser = createMockUser(email, displayName, role);
+      setCurrentUser(mockUser);
+      setFirebaseUser({} as FirebaseUser);
+      return;
+    }
+
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await sendEmailVerification(result.user);
     
@@ -58,10 +80,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
+    if (MOCK_MODE) {
+      // Mock signin - create a user if it doesn't exist
+      const mockUser = createMockUser(email, email.split('@')[0], 'worker');
+      setCurrentUser(mockUser);
+      setFirebaseUser({} as FirebaseUser);
+      return;
+    }
+
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signInWithGoogle = async () => {
+    if (MOCK_MODE) {
+      // Mock Google signin
+      const mockUser = createMockUser('mock@gmail.com', 'Mock User', 'worker');
+      setCurrentUser(mockUser);
+      setFirebaseUser({} as FirebaseUser);
+      return;
+    }
+
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     
@@ -87,18 +125,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    if (MOCK_MODE) {
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      return;
+    }
+
     await signOut(auth);
   };
 
   const updateUserProfile = async (data: Partial<User>) => {
     if (!currentUser) return;
     
+    if (MOCK_MODE) {
+      setCurrentUser({ ...currentUser, ...data });
+      return;
+    }
+
     const userRef = doc(db, 'users', currentUser.id);
     await setDoc(userRef, { ...currentUser, ...data }, { merge: true });
     setCurrentUser({ ...currentUser, ...data });
   };
 
   useEffect(() => {
+    if (MOCK_MODE) {
+      // Mock mode - no Firebase initialization needed
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       

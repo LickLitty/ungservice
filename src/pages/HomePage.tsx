@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import JobCard from '../components/jobs/JobCard';
@@ -6,12 +6,12 @@ import { Job } from '../types';
 import { 
   Search, 
   Plus, 
-  MapPin, 
   TrendingUp, 
   Star, 
   Users,
   Briefcase,
-  Calendar
+  Calendar,
+  Filter
 } from 'lucide-react';
 
 // Dummy data for demonstration
@@ -99,23 +99,132 @@ const dummyJobs: Job[] = [
     applicants: [],
     createdAt: new Date(),
     updatedAt: new Date()
+  },
+  {
+    id: '4',
+    title: 'Rydding av garasje',
+    description: 'Hjelp med å rydde og organisere garasjen. Mange ting som kan kastes eller doneres.',
+    category: 'cleaning',
+    location: {
+      address: 'Hovedgata 45, Stavanger',
+      coordinates: { lat: 58.9700, lng: 5.7331 }
+    },
+    date: new Date('2024-01-18T09:00:00'),
+    duration: 4,
+    wage: 140,
+    employerId: 'emp4',
+    employer: {
+      id: 'emp4',
+      email: 'anna@example.com',
+      displayName: 'Anna Berg',
+      role: 'employer',
+      rating: 4.7,
+      completedJobs: 6,
+      createdAt: new Date(),
+      isEmailVerified: true
+    },
+    status: 'open',
+    applicants: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: '5',
+    title: 'Maling av stakitt',
+    description: 'Male stakitt rundt hagen. Ca 30 meter totalt. Maling og verktøy tilgjengelig.',
+    category: 'painting',
+    location: {
+      address: 'Skoleveien 12, Tromsø',
+      coordinates: { lat: 69.6492, lng: 18.9553 }
+    },
+    date: new Date('2024-01-19T11:00:00'),
+    duration: 5,
+    wage: 160,
+    employerId: 'emp5',
+    employer: {
+      id: 'emp5',
+      email: 'lars@example.com',
+      displayName: 'Lars Nilsen',
+      role: 'employer',
+      rating: 4.9,
+      completedJobs: 20,
+      createdAt: new Date(),
+      isEmailVerified: true
+    },
+    status: 'open',
+    applicants: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: '6',
+    title: 'Hjelp med flytting',
+    description: 'Hjelp med å bære møbler og bokser fra 2. etasje til flyttebil. Ingen tunge møbler.',
+    category: 'moving',
+    location: {
+      address: 'Universitetsgata 7, Trondheim',
+      coordinates: { lat: 63.4305, lng: 10.3951 }
+    },
+    date: new Date('2024-01-20T13:00:00'),
+    duration: 2.5,
+    wage: 200,
+    employerId: 'emp6',
+    employer: {
+      id: 'emp6',
+      email: 'sarah@example.com',
+      displayName: 'Sarah Jensen',
+      role: 'employer',
+      rating: 4.6,
+      completedJobs: 3,
+      createdAt: new Date(),
+      isEmailVerified: true
+    },
+    status: 'open',
+    applicants: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 ];
 
 const HomePage: React.FC = () => {
   const { currentUser } = useAuth();
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>(dummyJobs);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const handleApply = (jobId: string) => {
+    if (!currentUser) {
+      // Redirect to login if not authenticated
+      window.location.href = '/#/login';
+      return;
+    }
     // TODO: Implement job application logic
     console.log('Applying for job:', jobId);
   };
+
+  const filteredJobs = featuredJobs.filter(job => {
+    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.location.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const stats = [
     { label: 'Aktive jobber', value: '127', icon: Briefcase },
     { label: 'Registrerte brukere', value: '1,234', icon: Users },
     { label: 'Fullførte jobber', value: '5,678', icon: Calendar },
     { label: 'Gjennomsnittlig rating', value: '4.7', icon: Star },
+  ];
+
+  const categories = [
+    { value: 'all', label: 'Alle kategorier' },
+    { value: 'grass-cutting', label: 'Gressklipping' },
+    { value: 'snow-shoveling', label: 'Snømåking' },
+    { value: 'gardening', label: 'Hagearbeid' },
+    { value: 'cleaning', label: 'Rydding' },
+    { value: 'painting', label: 'Maling' },
+    { value: 'moving', label: 'Flytting' },
   ];
 
   return (
@@ -130,6 +239,21 @@ const HomePage: React.FC = () => {
             <p className="text-xl md:text-2xl mb-8 text-primary-100">
               Koble sammen arbeidsgivere og ungdom for enklere hagearbeid, snømåking og mer
             </p>
+            
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Søk etter jobber, steder eller kategorier..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+                />
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {currentUser ? (
                 <>
@@ -189,29 +313,54 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Featured Jobs Section */}
+      {/* Jobs Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Utvalgte jobber</h2>
-          <Link
-            to="/jobs"
-            className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
-          >
-            Se alle jobber
-            <TrendingUp className="ml-1 h-4 w-4" />
-          </Link>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <h2 className="text-3xl font-bold text-gray-900">Aktuelle jobber</h2>
+          
+          {/* Filter */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-gray-500" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <Link
+              to="/jobs"
+              className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
+            >
+              Se alle jobber
+              <TrendingUp className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredJobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              showApplyButton={currentUser?.role === 'worker'}
-              onApply={handleApply}
-            />
-          ))}
-        </div>
+        {filteredJobs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Ingen jobber funnet med de valgte filtrene.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                showApplyButton={true}
+                onApply={handleApply}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* How it works */}
