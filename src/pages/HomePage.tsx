@@ -233,7 +233,7 @@ const HomePage: React.FC = () => {
                     </Link>
                   ) : (
                     <Link
-                      to="/dashboard"
+                      to="/jobs"
                       className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
                     >
                       <TrendingUp className="mr-2 h-5 w-5" />
@@ -285,7 +285,7 @@ const HomePage: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">Aktuelle jobber</h2>
           
           <Link
-            to="/dashboard"
+            to="/jobs"
             className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
           >
             Se alle jobber

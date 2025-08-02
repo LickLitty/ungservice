@@ -13,7 +13,8 @@ import {
   X,
   LogIn,
   BarChart3,
-  FileText
+  FileText,
+  Briefcase
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -38,6 +39,7 @@ const Navbar: React.FC = () => {
   const authenticatedNavigation = [
     ...navigation,
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+    { name: 'Se jobber', href: '/jobs', icon: Briefcase },
     { name: 'Publiser jobb', href: '/jobs/new', icon: Plus },
     { name: 'Søknader', href: '/jobs/applications', icon: FileText },
     { name: 'Meldinger', href: '/messages', icon: MessageCircle },
