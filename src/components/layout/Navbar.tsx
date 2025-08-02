@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   LogIn,
-  BarChart3
+  BarChart3,
+  FileText
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -33,13 +34,14 @@ const Navbar: React.FC = () => {
 
   const navigation = [
     { name: 'Hjem', href: '/', icon: Home },
-    { name: 'Søk jobber', href: '/jobs', icon: Search },
   ];
 
   const authenticatedNavigation = [
     ...navigation,
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
     { name: 'Publiser jobb', href: '/jobs/new', icon: Plus },
+    { name: 'Søknader', href: '/jobs/applications', icon: FileText },
+    { name: 'Søk jobber', href: '/jobs/search', icon: Search },
     { name: 'Meldinger', href: '/messages', icon: MessageCircle },
   ];
 

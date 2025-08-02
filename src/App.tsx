@@ -13,6 +13,8 @@ import DashboardPage from './pages/DashboardPage';
 import ChatSystem from './components/messages/ChatSystem';
 import UserProfile from './components/profile/UserProfile';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
+import JobSearchPage from './pages/JobSearchPage';
+import JobApplicationsPage from './pages/JobApplicationsPage';
 
 // Protected Route Component - only for actions that require login
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -155,6 +157,18 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute>
                 <NotificationSettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/jobs/search" 
+            element={<JobSearchPage />} 
+          />
+          <Route 
+            path="/jobs/applications" 
+            element={
+              <ProtectedRoute>
+                <JobApplicationsPage />
               </ProtectedRoute>
             } 
           />

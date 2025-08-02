@@ -3,10 +3,11 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewService } from '../../services/reviewService';
 import { User, Review, Job } from '../../types';
-import { Star, MapPin, Calendar, Clock, DollarSign, MessageSquare, Briefcase } from 'lucide-react';
+import { Star, MapPin, Calendar, Clock, DollarSign, MessageSquare, Briefcase, Edit } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import ProfileEditForm from './ProfileEditForm';
 
 const UserProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -21,6 +22,7 @@ const UserProfile: React.FC = () => {
   const [completedJobs, setCompletedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'jobs'>('overview');
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -55,6 +57,20 @@ const UserProfile: React.FC = () => {
       toast.error('Kunne ikke laste brukerprofil');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async (updatedUser: Partial<User>) => {
+    if (!currentUser) return;
+    
+    try {
+      // Update user profile
+      // await updateUserProfile(currentUser.id, updatedUser);
+      setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
     }
   };
 
@@ -130,8 +146,16 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      {isEditing && user ? (
+        <ProfileEditForm
+          user={user}
+          onSave={handleSaveProfile}
+          onCancel={() => setIsEditing(false)}
+        />
+      ) : (
+        <>
+          {/* Profile Header */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-start space-x-6">
           <div className="flex-shrink-0">
             {user.photoURL ? (
@@ -163,19 +187,80 @@ const UserProfile: React.FC = () => {
               </div>
               
               <div className="text-right">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  user.role === 'worker' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {user.role === 'worker' ? 'Arbeidstaker' : 'Arbeidsgiver'}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    user.role === 'worker' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {user.role === 'worker' ? 'Arbeidstaker' : 'Arbeidsgiver'}
+                  </span>
+                  {currentUser && currentUser.id === user.id && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
             {user.bio && (
               <p className="mt-4 text-gray-700">{user.bio}</p>
             )}
+
+            {/* Personal Information */}
+            <div className="mt-4 space-y-2">
+              {user.age && (
+                <div className="flex items-center text-gray-600">
+                  <span className="text-sm font-medium w-20">Alder:</span>
+                  <span className="text-sm">{user.age} år</span>
+                </div>
+              )}
+              
+              {user.city && (
+                <div className="flex items-center text-gray-600">
+                  <span className="text-sm font-medium w-20">By:</span>
+                  <span className="text-sm">{user.city}</span>
+                </div>
+              )}
+              
+              {user.address && (
+                <div className="flex items-center text-gray-600">
+                  <span className="text-sm font-medium w-20">Adresse:</span>
+                  <span className="text-sm">{user.address}</span>
+                </div>
+              )}
+              
+              {user.phone && (
+                <div className="flex items-center text-gray-600">
+                  <span className="text-sm font-medium w-20">Telefon:</span>
+                  <span className="text-sm">{user.phone}</span>
+                </div>
+              )}
+              
+              {user.experience && (
+                <div className="flex items-start text-gray-600">
+                  <span className="text-sm font-medium w-20">Erfaring:</span>
+                  <span className="text-sm">{user.experience}</span>
+                </div>
+              )}
+              
+              {user.skills && user.skills.length > 0 && (
+                <div className="flex items-start text-gray-600">
+                  <span className="text-sm font-medium w-20">Ferdigheter:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {user.skills.map((skill, index) => (
+                      <span key={index} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {user.location && (
               <div className="flex items-center mt-4 text-gray-600">
@@ -191,13 +276,6 @@ const UserProfile: React.FC = () => {
                   Medlem siden {user.createdAt.toLocaleDateString('nb-NO')}
                 </span>
               </div>
-              
-              {user.phone && (
-                <div className="flex items-center text-gray-600">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{user.phone}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -384,6 +462,8 @@ const UserProfile: React.FC = () => {
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

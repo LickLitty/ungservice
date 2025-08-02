@@ -267,7 +267,7 @@ const HomePage: React.FC = () => {
                     </Link>
                   ) : (
                     <Link
-                      to="/jobs"
+                      to="/jobs/search"
                       className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
                     >
                       <Search className="mr-2 h-5 w-5" />
@@ -336,7 +336,7 @@ const HomePage: React.FC = () => {
             </div>
             
             <Link
-              to="/jobs"
+              to="/jobs/search"
               className="text-primary-600 hover:text-primary-700 font-medium flex items-center"
             >
               Se alle jobber

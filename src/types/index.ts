@@ -6,6 +6,11 @@ export interface User {
   role: 'employer' | 'worker';
   bio?: string;
   phone?: string;
+  age?: number;
+  address?: string;
+  city?: string;
+  experience?: string;
+  skills?: string[];
   location?: {
     address: string;
     coordinates: {
