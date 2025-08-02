@@ -12,7 +12,10 @@ import {
   Calendar, 
   Star, 
   User, 
-  MessageCircle
+  MessageCircle,
+  AlertCircle,
+  Car,
+  Wrench
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
