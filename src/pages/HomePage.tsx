@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import JobCard from '../components/jobs/JobCard';
 import { Job } from '../types';
+import { StatsService, Stats } from '../services/statsService';
 import { 
   Plus, 
   TrendingUp, 
@@ -15,6 +16,28 @@ import {
 const HomePage: React.FC = () => {
   const { currentUser } = useAuth();
   const [featuredJobs] = useState<Job[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    activeJobs: 0,
+    registeredUsers: 0,
+    completedJobs: 0,
+    averageRating: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const realStats = await StatsService.getStats();
+        setStats(realStats);
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
 
   const handleApply = (jobId: string) => {
     if (!currentUser) {
@@ -26,11 +49,11 @@ const HomePage: React.FC = () => {
     console.log('Applying for job:', jobId);
   };
 
-  const stats = [
-    { label: 'Aktive jobber', value: '127', icon: Briefcase },
-    { label: 'Registrerte brukere', value: '1,234', icon: Users },
-    { label: 'Fullførte jobber', value: '5,678', icon: Calendar },
-    { label: 'Gjennomsnittlig rating', value: '4.7', icon: Star },
+  const statsData = [
+    { label: 'Aktive jobber', value: stats.activeJobs.toString(), icon: Briefcase },
+    { label: 'Registrerte brukere', value: stats.registeredUsers.toLocaleString(), icon: Users },
+    { label: 'Fullførte jobber', value: stats.completedJobs.toLocaleString(), icon: Calendar },
+    { label: 'Gjennomsnittlig rating', value: stats.averageRating.toString(), icon: Star },
   ];
 
   return (
@@ -89,12 +112,18 @@ const HomePage: React.FC = () => {
       <div className="bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+            {statsData.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="flex justify-center mb-2">
                   <stat.icon className="h-8 w-8 text-primary-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {statsLoading ? (
+                    <div className="animate-pulse bg-gray-200 h-8 w-16 rounded mx-auto"></div>
+                  ) : (
+                    stat.value
+                  )}
+                </div>
                 <div className="text-sm text-gray-600">{stat.label}</div>
               </div>
             ))}
