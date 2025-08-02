@@ -156,6 +156,33 @@ const CreateJobForm: React.FC = () => {
               )}
             </div>
 
+            {/* Categories */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Kategorier *
+              </label>
+              <div className="grid grid-cols-4 gap-3">
+                {categories.map((category) => (
+                  <button
+                    key={category.value}
+                    type="button"
+                    onClick={() => handleCategorySelect(category.value)}
+                    className={`p-3 border rounded-lg text-center transition-colors ${
+                      selectedCategories.includes(category.value)
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{category.icon}</div>
+                    <div className="text-xs font-medium">{category.label}</div>
+                  </button>
+                ))}
+              </div>
+              {errors.categories && (
+                <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
+              )}
+            </div>
+
             {/* Job Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -253,30 +280,22 @@ const CreateJobForm: React.FC = () => {
               />
             </div>
 
-            {/* Categories */}
+            {/* Wage */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Kategorier *
+              <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
+                {selectedPriceType === 'hourly' ? 'Lønn per time *' : 'Lønn *'}
               </label>
-              <div className="grid grid-cols-4 gap-3">
-                {categories.map((category) => (
-                  <button
-                    key={category.value}
-                    type="button"
-                    onClick={() => handleCategorySelect(category.value)}
-                    className={`p-3 border rounded-lg text-center transition-colors ${
-                      selectedCategories.includes(category.value)
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="text-xl mb-1">{category.icon}</div>
-                    <div className="text-xs font-medium">{category.label}</div>
-                  </button>
-                ))}
-              </div>
-              {errors.categories && (
-                <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
+              <input
+                {...register('wage', { valueAsNumber: true })}
+                type="number"
+                id="wage"
+                min={selectedPriceType === 'hourly' ? 50 : 100}
+                max={selectedPriceType === 'hourly' ? 1000 : 10000}
+                className="input-field"
+                placeholder={selectedPriceType === 'hourly' ? '150 kr/timen' : '500 kr'}
+              />
+              {errors.wage && (
+                <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
               )}
             </div>
 
@@ -418,25 +437,6 @@ const CreateJobForm: React.FC = () => {
                   <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
                 )}
               </div>
-            </div>
-
-            {/* Wage */}
-            <div>
-              <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                {selectedPriceType === 'hourly' ? 'Lønn per time *' : 'Lønn *'}
-              </label>
-              <input
-                {...register('wage', { valueAsNumber: true })}
-                type="number"
-                id="wage"
-                min={selectedPriceType === 'hourly' ? 50 : 100}
-                max={selectedPriceType === 'hourly' ? 1000 : 10000}
-                className="input-field"
-                placeholder={selectedPriceType === 'hourly' ? '150 kr/timen' : '500 kr'}
-              />
-              {errors.wage && (
-                <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
-              )}
             </div>
 
             {/* Address */}
