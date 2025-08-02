@@ -16,9 +16,13 @@ const createSchema = (priceType: PriceType) => yup.object({
   priceType: yup.string().oneOf(['hourly', 'fixed'], 'Velg prisetype').required('Prisetype er påkrevd'),
   carRequired: yup.boolean().required('Velg om bil kreves'),
   equipmentRequired: yup.string().oneOf(['yes', 'some', 'no'], 'Velg utstyrsbehov').required('Utstyrsbehov er påkrevd'),
-  wage: priceType === 'hourly' 
-    ? yup.number().min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd')
-    : yup.number().min(100, 'Pris må være minst 100 kr').max(10000, 'Pris kan ikke være mer enn 10 000 kr').required('Pris er påkrevd'),
+  wage: yup.number()
+    .when('priceType', {
+      is: 'hourly',
+      then: (schema) => schema.min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd'),
+      otherwise: (schema) => schema.min(100, 'Pris må være minst 100 kr').max(10000, 'Pris kan ikke være mer enn 10 000 kr').required('Pris er påkrevd'),
+    })
+    .required('Lønn er påkrevd'),
   address: yup.string().min(5, 'Adresse må være minst 5 tegn').required('Adresse er påkrevd'),
 }).required();
 
@@ -67,6 +71,12 @@ const CreateJobForm: React.FC = () => {
     setValue,
   } = useForm<FormData>({
     resolver: yupResolver(schema),
+    defaultValues: {
+      jobType: 'one-time',
+      priceType: 'hourly',
+      carRequired: false,
+      equipmentRequired: 'no',
+    }
   });
 
   const onSubmit = async (data: FormData) => {
@@ -80,6 +90,7 @@ const CreateJobForm: React.FC = () => {
       const { address, ...jobDataWithoutAddress } = data;
       const jobData = {
         ...jobDataWithoutAddress,
+        wage: data.wage || wage, // Use form data or local state
         employerId: currentUser.id,
         employer: {
           id: currentUser.id,
