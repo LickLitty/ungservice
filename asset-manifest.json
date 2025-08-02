@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ungservice/static/css/main.085778ec.css",
-    "main.js": "/ungservice/static/js/main.13061778.js",
+    "main.css": "/ungservice/static/css/main.81d5e8f9.css",
+    "main.js": "/ungservice/static/js/main.24561651.js",
     "static/js/453.e19c008c.chunk.js": "/ungservice/static/js/453.e19c008c.chunk.js",
     "index.html": "/ungservice/index.html",
-    "main.085778ec.css.map": "/ungservice/static/css/main.085778ec.css.map",
-    "main.13061778.js.map": "/ungservice/static/js/main.13061778.js.map",
+    "main.81d5e8f9.css.map": "/ungservice/static/css/main.81d5e8f9.css.map",
+    "main.24561651.js.map": "/ungservice/static/js/main.24561651.js.map",
     "453.e19c008c.chunk.js.map": "/ungservice/static/js/453.e19c008c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.085778ec.css",
-    "static/js/main.13061778.js"
+    "static/css/main.81d5e8f9.css",
+    "static/js/main.24561651.js"
   ]
 }
