@@ -10,14 +10,15 @@ const JobsOverviewPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
 
-  const loadJobs = useCallback(async () => {
+
+  const loadJobs = useCallback(() => {
     setLoading(true);
     try {
       // Subscribe to jobs from Firebase
       const unsubscribe = JobService.subscribeToJobs((jobs) => {
         setJobs(jobs);
+        setLoading(false);
       });
       
       // Return unsubscribe function for cleanup
@@ -25,7 +26,6 @@ const JobsOverviewPage: React.FC = () => {
     } catch (error) {
       console.error('Error loading jobs:', error);
       toast.error('Kunne ikke laste jobber');
-    } finally {
       setLoading(false);
     }
   }, []);
@@ -58,8 +58,7 @@ const JobsOverviewPage: React.FC = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesCategory = selectedCategory === 'all' || job.categories.includes(selectedCategory as JobCategory);
-    const matchesLocation = !selectedLocation || job.location.address.toLowerCase().includes(selectedLocation.toLowerCase());
-    return matchesCategory && matchesLocation;
+    return matchesCategory;
   });
 
   const categories = [
@@ -85,7 +84,7 @@ const JobsOverviewPage: React.FC = () => {
     { value: 'other', label: 'Annet' },
   ];
 
-  const locations = ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Tromsø'];
+
 
   if (loading) {
     return (

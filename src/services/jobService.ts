@@ -122,11 +122,25 @@ export class JobService {
     return onSnapshot(q, (snapshot) => {
       const jobs: Job[] = [];
       snapshot.forEach((doc) => {
+        const data = doc.data();
         jobs.push({
           id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+          title: data.title,
+          description: data.description,
+          categories: data.categories,
+          jobType: data.jobType,
+          priceType: data.priceType,
+          requirements: data.requirements,
+          location: data.location,
+          numberOfWorkers: data.numberOfWorkers,
+          expectedDuration: data.expectedDuration,
+          wage: data.wage,
+          employerId: data.employerId,
+          employer: data.employer,
+          status: data.status,
+          applicants: data.applicants || [],
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         } as Job);
       });
       callback(jobs);

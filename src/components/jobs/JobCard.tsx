@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { JobService } from '../../services/jobService';
 import { NotificationService } from '../../services/notificationService';
 import { Job } from '../../types';
-import { MapPin, Clock, DollarSign, User, Calendar, Star, Car, Wrench } from 'lucide-react';
+import { MapPin, Clock, DollarSign, User, Star, Car, Wrench } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface JobCardProps {
@@ -39,20 +39,7 @@ const JobCard: React.FC<JobCardProps> = ({
     }
   }, [currentUser, job.id, checkApplicationStatus]);
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('nb-NO', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  };
 
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('nb-NO', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {

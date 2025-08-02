@@ -77,16 +77,33 @@ const CreateJobForm: React.FC = () => {
 
     setIsLoading(true);
     try {
+      const { address, ...jobDataWithoutAddress } = data;
       const jobData = {
-        ...data,
+        ...jobDataWithoutAddress,
         employerId: currentUser.id,
         employer: {
           id: currentUser.id,
+          email: currentUser.email,
           displayName: currentUser.displayName,
+          role: currentUser.role,
           rating: currentUser.rating || 0,
+          completedJobs: currentUser.completedJobs || 0,
+          createdAt: currentUser.createdAt,
+          isEmailVerified: currentUser.isEmailVerified,
         },
         numberOfWorkers,
         expectedDuration,
+        location: {
+          address: address,
+          coordinates: {
+            lat: 0,
+            lng: 0,
+          },
+        },
+        requirements: {
+          carRequired,
+          equipmentRequired,
+        },
         status: 'open' as const,
         applicants: [],
         createdAt: new Date(),
@@ -94,7 +111,7 @@ const CreateJobForm: React.FC = () => {
       };
 
       // Save to Firestore
-      const jobId = await JobService.createJob(jobData);
+      await JobService.createJob(jobData);
       
       toast.success('Jobb publisert!');
       // Redirect to jobs overview page
