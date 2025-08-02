@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { JobService } from '../../services/jobService';
 import toast from 'react-hot-toast';
@@ -52,6 +53,7 @@ const categories: { value: JobCategory; label: string; icon: string }[] = [
 
 const CreateJobForm: React.FC = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<JobCategory[]>([]);
   const [selectedJobType, setSelectedJobType] = useState<JobType>('one-time');
@@ -132,7 +134,7 @@ const CreateJobForm: React.FC = () => {
       
       toast.success('Jobb publisert!');
       // Redirect to jobs overview page
-      window.location.href = '/#/jobs';
+      navigate('/jobs');
     } catch (error: any) {
       console.error('Error creating job:', error);
       toast.error('Kunne ikke publisere jobb: ' + error.message);
