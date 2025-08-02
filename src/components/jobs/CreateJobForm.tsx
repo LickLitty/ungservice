@@ -55,6 +55,8 @@ const CreateJobForm: React.FC = () => {
   const [selectedPriceType, setSelectedPriceType] = useState<PriceType>('hourly');
   const [carRequired, setCarRequired] = useState<boolean>(false);
   const [equipmentRequired, setEquipmentRequired] = useState<'yes' | 'some' | 'no'>('no');
+  const [expectedDuration, setExpectedDuration] = useState<number>(0);
+  const [wage, setWage] = useState<number>(0);
 
   const schema = createSchema(selectedPriceType);
 
@@ -130,6 +132,14 @@ const CreateJobForm: React.FC = () => {
   const handleEquipmentRequiredSelect = (equipment: 'yes' | 'some' | 'no') => {
     setEquipmentRequired(equipment);
     setValue('equipmentRequired', equipment);
+  };
+
+  const handleExpectedDurationChange = (value: number) => {
+    setExpectedDuration(value);
+  };
+
+  const handleWageChange = (value: number) => {
+    setWage(value);
   };
 
   return (
@@ -277,6 +287,8 @@ const CreateJobForm: React.FC = () => {
                 max="24"
                 className="input-field"
                 placeholder="F.eks. 2.5 timer"
+                value={expectedDuration || ''}
+                onChange={(e) => handleExpectedDurationChange(parseFloat(e.target.value) || 0)}
               />
             </div>
 
@@ -293,11 +305,30 @@ const CreateJobForm: React.FC = () => {
                 max={selectedPriceType === 'hourly' ? 1000 : 10000}
                 className="input-field"
                 placeholder={selectedPriceType === 'hourly' ? '150 kr/timen' : '500 kr'}
+                value={wage || ''}
+                onChange={(e) => handleWageChange(parseFloat(e.target.value) || 0)}
               />
               {errors.wage && (
                 <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
               )}
             </div>
+
+            {/* Expected Total Wage */}
+            {selectedPriceType === 'hourly' && expectedDuration > 0 && wage > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Forventet total lønn
+                </label>
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <div className="text-lg font-semibold text-gray-900">
+                    {Math.round(expectedDuration * wage).toLocaleString()} kr
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {expectedDuration} timer × {wage} kr/timen
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Job Requirements */}
             <div>
