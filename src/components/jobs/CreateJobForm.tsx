@@ -302,7 +302,7 @@ const CreateJobForm: React.FC = () => {
               {/* Equipment Required */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Utstyr - arbeidstaker må ta med
+                  Hva med utstyr?
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                                      <button
@@ -315,7 +315,7 @@ const CreateJobForm: React.FC = () => {
                      }`}
                    >
                      <div className="text-lg mb-1">🔧</div>
-                     <div className="text-sm font-medium">Må ta med alt</div>
+                     <div className="text-sm font-medium">Hjelper må ha alt</div>
                    </button>
                    <button
                      type="button"
@@ -327,7 +327,7 @@ const CreateJobForm: React.FC = () => {
                      }`}
                    >
                      <div className="text-lg mb-1">⚠️</div>
-                     <div className="text-sm font-medium">Må ta med noe</div>
+                     <div className="text-sm font-medium">Hjelper må ha litt</div>
                    </button>
                    <button
                      type="button"
@@ -339,7 +339,7 @@ const CreateJobForm: React.FC = () => {
                      }`}
                    >
                      <div className="text-lg mb-1">❌</div>
-                     <div className="text-sm font-medium">Alt tilgjengelig</div>
+                     <div className="text-sm font-medium">Jeg har alt</div>
                    </button>
                 </div>
               </div>
