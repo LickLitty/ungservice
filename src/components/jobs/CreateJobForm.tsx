@@ -302,22 +302,22 @@ const CreateJobForm: React.FC = () => {
               {/* Equipment Required */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Utstyr kreves
+                  Utstyr - arbeidstaker må ta med
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleEquipmentRequiredSelect('yes')}
-                    className={`p-3 border rounded-lg text-center transition-colors ${
-                      equipmentRequired === 'yes'
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="text-lg mb-1">🔧</div>
-                    <div className="text-sm font-medium">Ja</div>
-                  </button>
                                      <button
+                     type="button"
+                     onClick={() => handleEquipmentRequiredSelect('yes')}
+                     className={`p-3 border rounded-lg text-center transition-colors ${
+                       equipmentRequired === 'yes'
+                         ? 'border-primary-500 bg-primary-50 text-primary-700'
+                         : 'border-gray-300 hover:border-gray-400'
+                     }`}
+                   >
+                     <div className="text-lg mb-1">🔧</div>
+                     <div className="text-sm font-medium">Må ta med alt</div>
+                   </button>
+                   <button
                      type="button"
                      onClick={() => handleEquipmentRequiredSelect('some')}
                      className={`p-3 border rounded-lg text-center transition-colors ${
@@ -327,20 +327,20 @@ const CreateJobForm: React.FC = () => {
                      }`}
                    >
                      <div className="text-lg mb-1">⚠️</div>
-                     <div className="text-sm font-medium">Noe utstyr</div>
+                     <div className="text-sm font-medium">Må ta med noe</div>
                    </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEquipmentRequiredSelect('no')}
-                    className={`p-3 border rounded-lg text-center transition-colors ${
-                      equipmentRequired === 'no'
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="text-lg mb-1">❌</div>
-                    <div className="text-sm font-medium">Nei</div>
-                  </button>
+                   <button
+                     type="button"
+                     onClick={() => handleEquipmentRequiredSelect('no')}
+                     className={`p-3 border rounded-lg text-center transition-colors ${
+                       equipmentRequired === 'no'
+                         ? 'border-primary-500 bg-primary-50 text-primary-700'
+                         : 'border-gray-300 hover:border-gray-400'
+                     }`}
+                   >
+                     <div className="text-lg mb-1">❌</div>
+                     <div className="text-sm font-medium">Alt tilgjengelig</div>
+                   </button>
                 </div>
               </div>
               
