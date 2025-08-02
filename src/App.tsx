@@ -15,6 +15,7 @@ import UserProfile from './components/profile/UserProfile';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import JobSearchPage from './pages/JobSearchPage';
 import JobApplicationsPage from './pages/JobApplicationsPage';
+import JobDetailPage from './pages/JobDetailPage';
 
 // Protected Route Component - only for actions that require login
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -171,6 +172,10 @@ const AppContent: React.FC = () => {
                 <JobApplicationsPage />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/jobs/:jobId" 
+            element={<JobDetailPage />} 
           />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
