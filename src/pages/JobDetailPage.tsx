@@ -9,7 +9,6 @@ import {
   MapPin, 
   Clock, 
   DollarSign, 
-  Calendar, 
   Star, 
   User, 
   MessageCircle,
@@ -192,21 +191,7 @@ const JobDetailPage: React.FC = () => {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('nb-NO', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  };
 
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('nb-NO', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   if (loading) {
     return (
@@ -320,12 +305,12 @@ const JobDetailPage: React.FC = () => {
               <span>{job.location.address}</span>
             </div>
             <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="h-4 w-4 mr-2" />
-              <span>{formatDate(job.date)} kl. {formatTime(job.date)}</span>
+              <Clock className="h-4 w-4 mr-2" />
+              <span>{job.expectedDuration} timer</span>
             </div>
             <div className="flex items-center text-sm text-gray-600">
-              <Clock className="h-4 w-4 mr-2" />
-              <span>{job.duration} timer</span>
+              <User className="h-4 w-4 mr-2" />
+              <span>{job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}</span>
             </div>
             <div className="flex items-center text-sm font-semibold text-primary-600">
               <DollarSign className="h-4 w-4 mr-2" />

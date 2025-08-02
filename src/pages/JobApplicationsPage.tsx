@@ -190,12 +190,12 @@ const JobApplicationsPage: React.FC = () => {
                     <h4 className="font-medium text-gray-900 mb-2">{job.title}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                       <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {job.date.toLocaleDateString('nb-NO')} kl. {job.date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}
+                        <Clock className="h-4 w-4 mr-2" />
+                        {job.expectedDuration} timer
                       </div>
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {job.duration} timer
+                        <User className="h-4 w-4 mr-2" />
+                        {job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}
                       </div>
                       <div className="flex items-center">
                         <DollarSign className="h-4 w-4 mr-2" />

@@ -158,8 +158,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           <h4 className="text-sm font-medium text-gray-900 mb-2">Jobb detaljer</h4>
           <div className="space-y-1 text-sm text-gray-600">
             <p><strong>Jobb:</strong> {job.title}</p>
-            <p><strong>Dato:</strong> {job.date.toLocaleDateString('nb-NO')}</p>
-            <p><strong>Varighet:</strong> {job.duration} timer</p>
+            <p><strong>Varighet:</strong> {job.expectedDuration} timer</p>
+            <p><strong>Arbeidere:</strong> {job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}</p>
             <p><strong>Betaling:</strong> {job.wage} kr/timen</p>
           </div>
         </div>

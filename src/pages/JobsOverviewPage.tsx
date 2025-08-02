@@ -115,7 +115,7 @@ const JobsOverviewPage: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
           {/* Category Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -129,25 +129,6 @@ const JobsOverviewPage: React.FC = () => {
               {categories.map((category) => (
                 <option key={category.value} value={category.value}>
                   {category.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Location Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Lokasjon
-            </label>
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Alle lokasjoner</option>
-              {locations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
                 </option>
               ))}
             </select>

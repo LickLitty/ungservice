@@ -440,12 +440,12 @@ const UserProfile: React.FC = () => {
                         <p className="text-sm text-gray-600">{job.description}</p>
                         <div className="flex items-center mt-2 space-x-4 text-sm text-gray-500">
                           <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {job.date.toLocaleDateString('nb-NO')}
+                            <Clock className="h-4 w-4 mr-1" />
+                            {job.expectedDuration} timer
                           </div>
                           <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {job.duration} timer
+                            <User className="h-4 w-4 mr-1" />
+                            {job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}
                           </div>
                           <div className="flex items-center">
                             <DollarSign className="h-4 w-4 mr-1" />
