@@ -18,12 +18,21 @@ import { NotificationService } from './notificationService';
 export class JobService {
   // Create a new job
   static async createJob(jobData: Omit<Job, 'id'>): Promise<string> {
-    const docRef = await addDoc(collection(db, 'jobs'), {
-      ...jobData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-    return docRef.id;
+    try {
+      console.log('JobService.createJob called with data:', jobData);
+      
+      const docRef = await addDoc(collection(db, 'jobs'), {
+        ...jobData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      
+      console.log('Job created successfully with ID:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error in JobService.createJob:', error);
+      throw error;
+    }
   }
 
   // Apply for a job

@@ -80,6 +80,9 @@ const CreateJobForm: React.FC = () => {
   });
 
   const onSubmit = async (data: FormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Current user:', currentUser);
+    
     if (!currentUser) {
       toast.error('Du må være innlogget for å publisere jobber');
       return;
@@ -121,13 +124,17 @@ const CreateJobForm: React.FC = () => {
         updatedAt: new Date(),
       };
 
+      console.log('Job data to be saved:', jobData);
+
       // Save to Firestore
-      await JobService.createJob(jobData);
+      const jobId = await JobService.createJob(jobData);
+      console.log('Job created with ID:', jobId);
       
       toast.success('Jobb publisert!');
       // Redirect to jobs overview page
       window.location.href = '/#/jobs';
     } catch (error: any) {
+      console.error('Error creating job:', error);
       toast.error('Kunne ikke publisere jobb: ' + error.message);
     } finally {
       setIsLoading(false);
