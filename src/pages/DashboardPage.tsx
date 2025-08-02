@@ -12,93 +12,13 @@ import {
   Calendar
 } from 'lucide-react';
 
-// Dummy data for demonstration
-const dummyUserJobs: Job[] = [
-  {
-    id: '1',
-    title: 'Gressklipping i hagen',
-    description: 'Trenger hjelp med å klippe gresset i hagen. Området er ca 200m². Verktøy tilgjengelig.',
-    category: 'grass-cutting',
-    location: {
-      address: 'Storgata 15, Oslo',
-      coordinates: { lat: 59.9139, lng: 10.7522 }
-    },
-    date: new Date('2024-01-15T10:00:00'),
-    duration: 2,
-    wage: 150,
-    employerId: 'user1',
-    employer: {
-      id: 'user1',
-      email: 'user@example.com',
-      displayName: 'Du',
-      role: 'employer',
-      rating: 4.5,
-      completedJobs: 5,
-      createdAt: new Date(),
-      isEmailVerified: true
-    },
-    status: 'open',
-    applicants: ['applicant1', 'applicant2'],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '2',
-    title: 'Snømåking på oppkjørsel',
-    description: 'Måke snø på oppkjørsel og gangsti. Ca 50m² totalt.',
-    category: 'snow-shoveling',
-    location: {
-      address: 'Kirkeveien 8, Bergen',
-      coordinates: { lat: 60.3913, lng: 5.3221 }
-    },
-    date: new Date('2024-01-16T08:00:00'),
-    duration: 1.5,
-    wage: 180,
-    employerId: 'user1',
-    employer: {
-      id: 'user1',
-      email: 'user@example.com',
-      displayName: 'Du',
-      role: 'employer',
-      rating: 4.5,
-      completedJobs: 5,
-      createdAt: new Date(),
-      isEmailVerified: true
-    },
-    status: 'in-progress',
-    applicants: ['applicant3'],
-    assignedWorker: 'applicant3',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-];
 
-const dummyApplications: JobApplication[] = [
-  {
-    id: 'app1',
-    jobId: 'job1',
-    workerId: 'worker1',
-    worker: {
-      id: 'worker1',
-      email: 'worker@example.com',
-      displayName: 'Lars Hansen',
-      role: 'worker',
-      rating: 4.2,
-      completedJobs: 8,
-      createdAt: new Date(),
-      isEmailVerified: true
-    },
-    status: 'pending',
-    message: 'Jeg har erfaring med gressklipping og kan hjelpe deg med dette.',
-    createdAt: new Date()
-  }
-];
 
 const DashboardPage: React.FC = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'my-jobs' | 'applications' | 'booked'>('overview');
-  const [userJobs] = useState<Job[]>(dummyUserJobs);
-  const [applications] = useState<JobApplication[]>(dummyApplications);
+  const [userJobs] = useState<Job[]>([]);
+  const [applications] = useState<JobApplication[]>([]);
 
   const stats = [
     { label: 'Jobber publisert', value: userJobs.length, icon: Briefcase, color: 'text-blue-600' },

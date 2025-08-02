@@ -31,42 +31,14 @@ const JobDetailPage: React.FC = () => {
   const [applicationStatus, setApplicationStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
   const [isApplying, setIsApplying] = useState(false);
 
-  // Dummy job data for demonstration (in a real app, this would come from Firebase)
-  const dummyJob: Job = {
-    id: '1',
-    title: 'Hente PEPS til FUTCH',
-    description: 'Måke snø if u know what i mean',
-    category: 'snow-shoveling',
-    location: {
-      address: 'B-town',
-      coordinates: { lat: 59.9139, lng: 10.7522 }
-    },
-    date: new Date('2025-08-01T22:26:00'),
-    duration: 2,
-    wage: 419,
-    employerId: 'emp1',
-    employer: {
-      id: 'emp1',
-      email: 'egil2@example.com',
-      displayName: 'Egil2',
-      role: 'employer',
-      rating: 0,
-      completedJobs: 0,
-      createdAt: new Date(),
-      isEmailVerified: true
-    },
-    status: 'open',
-    applicants: [],
-    createdAt: new Date('2025-08-01T22:26:00'),
-    updatedAt: new Date('2025-08-01T22:26:00')
-  };
+
 
   const loadJob = useCallback(async () => {
     setLoading(true);
     try {
       // In a real app, this would fetch from Firebase
       // const jobData = await JobService.getJobById(jobId!);
-      setJob(dummyJob);
+      setJob(null); // No dummy job data
       
       // Check application status if user is a worker
       if (currentUser && currentUser.role === 'worker') {

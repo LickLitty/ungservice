@@ -12,41 +12,7 @@ const JobApplicationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<string>('all');
 
-  // Dummy data for demonstration
-  const dummyJobs: Job[] = [
-    {
-      id: '1',
-      title: 'Gressklipping i hagen',
-      description: 'Trenger hjelp med å klippe gresset i hagen.',
-      category: 'grass-cutting',
-      location: {
-        address: 'Storgata 15, Oslo',
-        coordinates: { lat: 59.9139, lng: 10.7522 }
-      },
-      date: new Date('2024-01-15T10:00:00'),
-      duration: 2,
-      wage: 150,
-      employerId: 'emp1',
-      employer: {
-        id: 'emp1',
-        email: 'john@example.com',
-        displayName: 'John Hansen',
-        role: 'employer',
-        rating: 4.5,
-        completedJobs: 12,
-        createdAt: new Date(),
-        isEmailVerified: true
-      },
-      status: 'open',
-      applicants: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ];
 
-  const dummyApplications: JobApplication[] = [
-    {
-      id: 'app1',
       jobId: '1',
       workerId: 'worker1',
       worker: {
@@ -91,8 +57,8 @@ const JobApplicationsPage: React.FC = () => {
     setLoading(true);
     try {
       // In a real app, this would fetch from Firebase
-      setJobs(dummyJobs);
-      setApplications(dummyApplications);
+      setJobs([]);
+      setApplications([]);
     } catch (error) {
       console.error('Error loading applications:', error);
       toast.error('Kunne ikke laste søknader');
