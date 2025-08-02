@@ -12,47 +12,6 @@ const JobApplicationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<string>('all');
 
-
-      jobId: '1',
-      workerId: 'worker1',
-      worker: {
-        id: 'worker1',
-        email: 'lars@example.com',
-        displayName: 'Lars Andersen',
-        role: 'worker',
-        rating: 4.2,
-        completedJobs: 8,
-        age: 18,
-        city: 'Oslo',
-        createdAt: new Date(),
-        isEmailVerified: true
-      },
-      status: 'pending',
-      message: 'Hei! Jeg er interessert i jobben og har erfaring med gressklipping.',
-      createdAt: new Date(Date.now() - 3600000) // 1 hour ago
-    },
-    {
-      id: 'app2',
-      jobId: '1',
-      workerId: 'worker2',
-      worker: {
-        id: 'worker2',
-        email: 'maria@example.com',
-        displayName: 'Maria Johansen',
-        role: 'worker',
-        rating: 4.8,
-        completedJobs: 15,
-        age: 19,
-        city: 'Oslo',
-        createdAt: new Date(),
-        isEmailVerified: true
-      },
-      status: 'pending',
-      message: 'Jeg har gjort mye hagearbeid og har eget utstyr.',
-      createdAt: new Date(Date.now() - 7200000) // 2 hours ago
-    }
-  ];
-
   const loadApplications = useCallback(async () => {
     setLoading(true);
     try {
