@@ -55,6 +55,7 @@ const CreateJobForm: React.FC = () => {
   const [equipmentRequired, setEquipmentRequired] = useState<'yes' | 'some' | 'no'>('no');
   const [expectedDuration, setExpectedDuration] = useState<number>(0);
   const [wage, setWage] = useState<number>(0);
+  const [numberOfWorkers, setNumberOfWorkers] = useState<number>(1);
 
   const schema = createSchema(selectedPriceType);
 
@@ -134,6 +135,10 @@ const CreateJobForm: React.FC = () => {
     setWage(value);
   };
 
+  const handleNumberOfWorkersChange = (value: number) => {
+    setNumberOfWorkers(value);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
@@ -183,6 +188,33 @@ const CreateJobForm: React.FC = () => {
               {errors.categories && (
                 <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
               )}
+            </div>
+
+            {/* Number of Workers */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Antall arbeidere ønsket
+              </label>
+              <div className="text-sm text-gray-600 mb-3">
+                Hvor mange personer trenger du for å utføre jobben?
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => handleNumberOfWorkersChange(num)}
+                    className={`p-4 border rounded-lg text-center transition-colors ${
+                      numberOfWorkers === num
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">👥</div>
+                    <div className="text-sm font-medium">{num} {num === 1 ? 'person' : 'personer'}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Job Type */}
@@ -287,7 +319,12 @@ const CreateJobForm: React.FC = () => {
             {/* Wage */}
             <div>
               <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                {selectedPriceType === 'hourly' ? 'Lønn per time *' : 'Lønn *'}
+                {selectedPriceType === 'hourly' 
+                  ? numberOfWorkers > 1 
+                    ? `Lønn per time per arbeider *` 
+                    : 'Lønn per time *'
+                  : 'Lønn *'
+                }
               </label>
               <input
                 {...register('wage', { valueAsNumber: true })}
@@ -313,10 +350,10 @@ const CreateJobForm: React.FC = () => {
                 </label>
                 <div className="p-3 bg-gray-50 rounded-lg border">
                   <div className="text-lg font-semibold text-gray-900">
-                    {Math.round(expectedDuration * wage).toLocaleString()} kr
+                    {Math.round(expectedDuration * wage * numberOfWorkers).toLocaleString()} kr
                   </div>
                   <div className="text-sm text-gray-600">
-                    {expectedDuration} timer × {wage} kr/timen
+                    {expectedDuration} timer × {wage} kr/timen × {numberOfWorkers} {numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}
                   </div>
                 </div>
               </div>
