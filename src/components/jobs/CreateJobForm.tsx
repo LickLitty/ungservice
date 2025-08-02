@@ -117,8 +117,12 @@ const CreateJobForm: React.FC = () => {
     setIsLoading(true);
     try {
       const { address, ...jobDataWithoutAddress } = data;
+      console.log('Form data without address:', jobDataWithoutAddress);
+      console.log('Address from form:', address);
+      
       const jobData = {
-        ...jobDataWithoutAddress,
+        title: data.title, // Use form data for title
+        description: data.description, // Use form data for description
         categories: selectedCategories, // Use local state instead of form data
         jobType: selectedJobType, // Use local state instead of form data
         priceType: selectedPriceType, // Use local state instead of form data
