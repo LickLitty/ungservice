@@ -45,6 +45,7 @@ const SignUpForm: React.FC = () => {
   return (
     <div className="max-w-md mx-auto">
       <div className="card">
+        {/* Registration form */}
         <h2 className="text-2xl font-bold text-center mb-6">Opprett konto</h2>
         
         {/* Email verification notice */}
