@@ -99,9 +99,8 @@ const ChatSystem: React.FC = () => {
       const conversation: Conversation = {
         id: conversationId,
         participants: [currentUser.id, targetUserId],
-        lastMessage: jobId ? `Hei! Jeg er interessert i jobben din.` : 'Hei!',
-        lastMessageTime: new Date(),
-        createdAt: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       // TODO: Save conversation to Firestore
