@@ -30,9 +30,9 @@ const JobDetailPage: React.FC = () => {
   const loadJob = useCallback(async () => {
     setLoading(true);
     try {
-      // In a real app, this would fetch from Firebase
-      // const jobData = await JobService.getJobById(jobId!);
-      setJob(null); // No dummy job data
+      console.log('Loading job with ID:', jobId);
+      const jobData = await JobService.getJobById(jobId!);
+      setJob(jobData);
       
       // Check application status if user is a worker
       if (currentUser && currentUser.role === 'worker') {
@@ -42,6 +42,7 @@ const JobDetailPage: React.FC = () => {
     } catch (error) {
       console.error('Error loading job:', error);
       toast.error('Kunne ikke laste jobb');
+      setJob(null);
     } finally {
       setLoading(false);
     }

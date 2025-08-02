@@ -258,6 +258,47 @@ export class JobService {
     return application.status;
   }
 
+  // Get a specific job by ID
+  static async getJobById(jobId: string): Promise<Job> {
+    try {
+      console.log('Getting job by ID:', jobId);
+      const jobDoc = await getDoc(doc(db, 'jobs', jobId));
+      
+      if (!jobDoc.exists()) {
+        throw new Error('Job not found');
+      }
+      
+      const data = jobDoc.data();
+      console.log('Job data retrieved:', data);
+      
+      const job: Job = {
+        id: jobDoc.id,
+        title: data.title,
+        description: data.description,
+        categories: data.categories,
+        jobType: data.jobType,
+        priceType: data.priceType,
+        requirements: data.requirements,
+        location: data.location,
+        numberOfWorkers: data.numberOfWorkers,
+        expectedDuration: data.expectedDuration,
+        wage: data.wage,
+        employerId: data.employerId,
+        employer: data.employer,
+        status: data.status,
+        applicants: data.applicants || [],
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      };
+      
+      console.log('Processed job:', job);
+      return job;
+    } catch (error) {
+      console.error('Error getting job by ID:', error);
+      throw error;
+    }
+  }
+
   // Get completed jobs for a user
   static async getCompletedJobs(userId: string): Promise<Job[]> {
     const q = query(
