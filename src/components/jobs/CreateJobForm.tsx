@@ -260,6 +260,27 @@ const CreateJobForm: React.FC = () => {
               )}
             </div>
 
+            {/* Expected Duration */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Forventet varighet
+              </label>
+              <div className="text-sm text-gray-600 mb-3">
+                {selectedPriceType === 'hourly' 
+                  ? 'Angi hvor mange timer jobben forventes å ta. Dette påvirker totalprisen.'
+                  : 'Angi hvor mange timer jobben forventes å ta. Dette er kun informativt.'
+                }
+              </div>
+              <input
+                type="number"
+                step="0.5"
+                min="0.5"
+                max="24"
+                className="input-field"
+                placeholder="F.eks. 2.5 timer"
+              />
+            </div>
+
             {/* Job Requirements */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
