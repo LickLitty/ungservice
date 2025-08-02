@@ -281,12 +281,24 @@ export class JobService {
         throw new Error('Job ID is required');
       }
       
+      console.log('Fetching document from Firestore...');
       const jobDoc = await getDoc(doc(db, 'jobs', jobId));
       
       console.log('Job document exists:', jobDoc.exists());
+      console.log('Job document ID:', jobDoc.id);
       
       if (!jobDoc.exists()) {
         console.log('Job document does not exist for ID:', jobId);
+        console.log('Available documents in jobs collection:');
+        
+        // List all documents in the jobs collection for debugging
+        const allJobsQuery = query(collection(db, 'jobs'));
+        const allJobsSnapshot = await getDocs(allJobsQuery);
+        console.log('Total jobs in collection:', allJobsSnapshot.size);
+        allJobsSnapshot.forEach((doc) => {
+          console.log('Job ID:', doc.id, 'Title:', doc.data().title);
+        });
+        
         throw new Error('Job not found');
       }
       
@@ -296,6 +308,9 @@ export class JobService {
       // Validate required fields
       if (!data.title || !data.description || !data.categories) {
         console.error('Job data missing required fields:', data);
+        console.error('Title:', data.title);
+        console.error('Description:', data.description);
+        console.error('Categories:', data.categories);
         throw new Error('Job data is incomplete');
       }
       

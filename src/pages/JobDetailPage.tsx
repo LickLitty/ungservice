@@ -31,17 +31,28 @@ const JobDetailPage: React.FC = () => {
     setLoading(true);
     try {
       console.log('Loading job with ID:', jobId);
-      const jobData = await JobService.getJobById(jobId!);
+      console.log('Current user:', currentUser);
+      
+      if (!jobId) {
+        console.error('No job ID provided');
+        toast.error('Ingen jobb ID funnet');
+        setJob(null);
+        return;
+      }
+      
+      const jobData = await JobService.getJobById(jobId);
+      console.log('Job data loaded successfully:', jobData);
       setJob(jobData);
       
       // Check application status if user is a worker
       if (currentUser && currentUser.role === 'worker') {
-        const status = await JobService.getApplicationStatus(jobId!, currentUser.id);
+        const status = await JobService.getApplicationStatus(jobId, currentUser.id);
         setApplicationStatus(status);
       }
     } catch (error) {
       console.error('Error loading job:', error);
-      toast.error('Kunne ikke laste jobb');
+      console.error('Error details:', error);
+      toast.error('Kunne ikke laste jobb: ' + (error as Error).message);
       setJob(null);
     } finally {
       setLoading(false);
