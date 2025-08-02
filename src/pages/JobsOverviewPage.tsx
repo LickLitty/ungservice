@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { Job, JobCategory } from '../types';
 import JobCard from '../components/jobs/JobCard';
 import toast from 'react-hot-toast';
 
 const JobsOverviewPage: React.FC = () => {
-  const { currentUser } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
