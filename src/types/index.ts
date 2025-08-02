@@ -29,6 +29,9 @@ export interface Job {
   title: string;
   description: string;
   categories: JobCategory[]; // Changed from single category to array
+  jobType: JobType;
+  priceType: PriceType;
+  requirements: JobRequirements;
   location: {
     address: string;
     coordinates: {
@@ -67,6 +70,15 @@ export type JobCategory =
   | 'salt-sand'              // 🧂 Strø med sand / salt
   | 'pet-sitting'            // 🐕 Dyrepass
   | 'other';                 // ✨ Annet
+
+export type JobType = 'one-time' | 'recurring';
+
+export type PriceType = 'hourly' | 'fixed';
+
+export interface JobRequirements {
+  carRequired: boolean;
+  equipmentRequired: 'yes' | 'some' | 'no';
+}
 
 export interface JobApplication {
   id: string;

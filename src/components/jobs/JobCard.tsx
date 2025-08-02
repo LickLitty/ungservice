@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { JobService } from '../../services/jobService';
 import { NotificationService } from '../../services/notificationService';
 import { Job } from '../../types';
-import { MapPin, Clock, DollarSign, User, Calendar, Star } from 'lucide-react';
+import { MapPin, Clock, DollarSign, User, Calendar, Star, Car, Wrench } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface JobCardProps {
@@ -140,6 +140,27 @@ const JobCard: React.FC<JobCardProps> = ({
     }
   };
 
+  const getJobTypeText = (jobType: string) => {
+    return jobType === 'one-time' ? 'Engangsjobb' : 'Gjentakende';
+  };
+
+  const getPriceTypeText = (priceType: string) => {
+    return priceType === 'hourly' ? 'Timebetalt' : 'Fastpris';
+  };
+
+  const getEquipmentText = (equipment: string) => {
+    switch (equipment) {
+      case 'yes':
+        return 'Utstyr kreves';
+      case 'some':
+        return 'Noe utstyr';
+      case 'no':
+        return 'Ingen utstyr';
+      default:
+        return '';
+    }
+  };
+
   const handleApplyClick = async () => {
     if (!currentUser || currentUser.role !== 'worker') {
       toast.error('Du må være innlogget som arbeidstaker for å søke på jobber');
@@ -199,6 +220,16 @@ const JobCard: React.FC<JobCardProps> = ({
           </div>
         </div>
 
+        {/* Job Type and Price Type */}
+        <div className="flex items-center space-x-2 mb-3">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {getJobTypeText(job.jobType)}
+          </span>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            {getPriceTypeText(job.priceType)}
+          </span>
+        </div>
+
         {/* Categories */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
@@ -239,6 +270,22 @@ const JobCard: React.FC<JobCardProps> = ({
               <span>{job.wage} kr/timen</span>
             </div>
           </div>
+        </div>
+
+        {/* Requirements */}
+        <div className="flex items-center space-x-3 mb-4">
+          {job.requirements.carRequired && (
+            <div className="flex items-center text-xs text-gray-600">
+              <Car className="h-3 w-3 mr-1" />
+              <span>Bil kreves</span>
+            </div>
+          )}
+          {job.requirements.equipmentRequired !== 'no' && (
+            <div className="flex items-center text-xs text-gray-600">
+              <Wrench className="h-3 w-3 mr-1" />
+              <span>{getEquipmentText(job.requirements.equipmentRequired)}</span>
+            </div>
+          )}
         </div>
       </Link>
 

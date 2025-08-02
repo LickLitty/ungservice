@@ -9,15 +9,23 @@ import {
   DollarSign, 
   MapPin, 
   Plus,
-  X
+  X,
+  Hammer,
+  RefreshCw,
+  Car,
+  Wrench
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { JobCategory } from '../../types';
+import { JobCategory, JobType, PriceType, JobRequirements } from '../../types';
 
 const schema = yup.object({
   title: yup.string().min(5, 'Tittel må være minst 5 tegn').required('Tittel er påkrevd'),
   description: yup.string().min(20, 'Beskrivelse må være minst 20 tegn').required('Beskrivelse er påkrevd'),
   categories: yup.array().min(1, 'Velg minst én kategori').required('Kategori er påkrevd'),
+  jobType: yup.string().oneOf(['one-time', 'recurring'], 'Velg jobbtype').required('Jobbtype er påkrevd'),
+  priceType: yup.string().oneOf(['hourly', 'fixed'], 'Velg prisetype').required('Prisetype er påkrevd'),
+  carRequired: yup.boolean().required('Velg om bil kreves'),
+  equipmentRequired: yup.string().oneOf(['yes', 'some', 'no'], 'Velg utstyrsbehov').required('Utstyrsbehov er påkrevd'),
   date: yup.date().min(new Date(), 'Dato må være i fremtiden').required('Dato er påkrevd'),
   time: yup.string().required('Tidspunkt er påkrevd'),
   duration: yup.number().min(0.5, 'Varighet må være minst 0.5 timer').max(24, 'Varighet kan ikke være mer enn 24 timer').required('Varighet er påkrevd'),
@@ -53,6 +61,10 @@ const CreateJobForm: React.FC = () => {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<JobCategory[]>([]);
+  const [selectedJobType, setSelectedJobType] = useState<JobType>('one-time');
+  const [selectedPriceType, setSelectedPriceType] = useState<PriceType>('hourly');
+  const [carRequired, setCarRequired] = useState<boolean>(false);
+  const [equipmentRequired, setEquipmentRequired] = useState<'yes' | 'some' | 'no'>('no');
 
   const {
     register,
@@ -106,6 +118,26 @@ const CreateJobForm: React.FC = () => {
     
     setSelectedCategories(newCategories);
     setValue('categories', newCategories);
+  };
+
+  const handleJobTypeSelect = (jobType: JobType) => {
+    setSelectedJobType(jobType);
+    setValue('jobType', jobType);
+  };
+
+  const handlePriceTypeSelect = (priceType: PriceType) => {
+    setSelectedPriceType(priceType);
+    setValue('priceType', priceType);
+  };
+
+  const handleCarRequiredSelect = (required: boolean) => {
+    setCarRequired(required);
+    setValue('carRequired', required);
+  };
+
+  const handleEquipmentRequiredSelect = (equipment: 'yes' | 'some' | 'no') => {
+    setEquipmentRequired(equipment);
+    setValue('equipmentRequired', equipment);
   };
 
   return (
@@ -163,6 +195,173 @@ const CreateJobForm: React.FC = () => {
             </div>
             {errors.categories && (
               <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
+            )}
+          </div>
+
+          {/* Job Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Type jobb *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleJobTypeSelect('one-time')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  selectedJobType === 'one-time'
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-2xl mb-2">🔨</div>
+                <div className="text-sm font-medium">Engangsjobb</div>
+                <div className="text-xs text-gray-500">Enkelt oppdrag</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleJobTypeSelect('recurring')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  selectedJobType === 'recurring'
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-2xl mb-2">🔄</div>
+                <div className="text-sm font-medium">Gjentakende jobb</div>
+                <div className="text-xs text-gray-500">Regelmessig arbeid</div>
+              </button>
+            </div>
+            {errors.jobType && (
+              <p className="text-red-500 text-sm mt-1">{errors.jobType.message}</p>
+            )}
+          </div>
+
+          {/* Price Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Prisetype *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handlePriceTypeSelect('hourly')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  selectedPriceType === 'hourly'
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-2xl mb-2">⏰</div>
+                <div className="text-sm font-medium">Timebetalt</div>
+                <div className="text-xs text-gray-500">Per time</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePriceTypeSelect('fixed')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  selectedPriceType === 'fixed'
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-2xl mb-2">💰</div>
+                <div className="text-sm font-medium">Fastpris</div>
+                <div className="text-xs text-gray-500">Fast beløp</div>
+              </button>
+            </div>
+            {errors.priceType && (
+              <p className="text-red-500 text-sm mt-1">{errors.priceType.message}</p>
+            )}
+          </div>
+
+          {/* Job Requirements */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Jobbkrav *
+            </label>
+            
+            {/* Car Required */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bil kreves
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleCarRequiredSelect(true)}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    carRequired === true
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🚗</div>
+                  <div className="text-sm font-medium">Ja</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCarRequiredSelect(false)}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    carRequired === false
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-lg mb-1">❌</div>
+                  <div className="text-sm font-medium">Nei</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Equipment Required */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Utstyr kreves
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleEquipmentRequiredSelect('yes')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    equipmentRequired === 'yes'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🔧</div>
+                  <div className="text-sm font-medium">Ja</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEquipmentRequiredSelect('some')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    equipmentRequired === 'some'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🔨</div>
+                  <div className="text-sm font-medium">Noe utstyr</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEquipmentRequiredSelect('no')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    equipmentRequired === 'no'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-lg mb-1">❌</div>
+                  <div className="text-sm font-medium">Nei</div>
+                </button>
+              </div>
+            </div>
+            
+            {(errors.carRequired || errors.equipmentRequired) && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.carRequired?.message || errors.equipmentRequired?.message}
+              </p>
             )}
           </div>
 

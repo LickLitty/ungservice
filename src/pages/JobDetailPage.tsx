@@ -16,7 +16,9 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  Car,
+  Wrench
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -172,6 +174,27 @@ const JobDetailPage: React.FC = () => {
     }
   };
 
+  const getJobTypeText = (jobType: string) => {
+    return jobType === 'one-time' ? 'Engangsjobb' : 'Gjentakende jobb';
+  };
+
+  const getPriceTypeText = (priceType: string) => {
+    return priceType === 'hourly' ? 'Timebetalt' : 'Fastpris';
+  };
+
+  const getEquipmentText = (equipment: string) => {
+    switch (equipment) {
+      case 'yes':
+        return 'Ja, utstyr kreves';
+      case 'some':
+        return 'Noe utstyr nødvendig';
+      case 'no':
+        return 'Nei, ingen utstyr';
+      default:
+        return '';
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('nb-NO', {
       weekday: 'long',
@@ -267,6 +290,16 @@ const JobDetailPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Job Type and Price Type */}
+          <div className="flex items-center space-x-3 mb-4">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              {getJobTypeText(job.jobType)}
+            </span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              {getPriceTypeText(job.priceType)}
+            </span>
+          </div>
+
           {/* Categories */}
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Kategorier:</h3>
@@ -300,6 +333,25 @@ const JobDetailPage: React.FC = () => {
             <div className="flex items-center text-sm font-semibold text-primary-600">
               <DollarSign className="h-4 w-4 mr-2" />
               <span>{job.wage} kr/timen</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Job Requirements */}
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Jobbkrav</h3>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <Car className="h-4 w-4 mr-3 text-gray-400" />
+              <span className="text-gray-700">
+                Bil kreves: <span className="font-medium">{job.requirements.carRequired ? 'Ja' : 'Nei'}</span>
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Wrench className="h-4 w-4 mr-3 text-gray-400" />
+              <span className="text-gray-700">
+                Utstyr: <span className="font-medium">{getEquipmentText(job.requirements.equipmentRequired)}</span>
+              </span>
             </div>
           </div>
         </div>
