@@ -163,14 +163,6 @@ const JobCard: React.FC<JobCardProps> = ({
     try {
       await JobService.applyForJob(job.id, currentUser.id);
       
-      // Send notification to employer
-      await NotificationService.notifyJobApplication(
-        job.employerId,
-        currentUser.displayName,
-        job.title,
-        job.id
-      );
-      
       setApplicationStatus('pending');
       toast.success('Søknad sendt! Arbeidsgiveren vil bli varslet.');
     } catch (error: any) {

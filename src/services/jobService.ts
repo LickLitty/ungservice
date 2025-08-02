@@ -51,45 +51,76 @@ export class JobService {
 
   // Apply for a job
   static async applyForJob(jobId: string, workerId: string, message?: string): Promise<string> {
-    // Get job details
-    const jobDoc = await getDoc(doc(db, 'jobs', jobId));
-    if (!jobDoc.exists()) {
-      throw new Error('Job not found');
+    try {
+      console.log('Applying for job:', jobId, 'by worker:', workerId);
+      
+      // Get job details
+      const jobDoc = await getDoc(doc(db, 'jobs', jobId));
+      if (!jobDoc.exists()) {
+        throw new Error('Job not found');
+      }
+      
+      const job = jobDoc.data() as Job;
+      console.log('Job found:', job.title);
+      
+      // Get worker details
+      const workerDoc = await getDoc(doc(db, 'users', workerId));
+      if (!workerDoc.exists()) {
+        throw new Error('Worker not found');
+      }
+      
+      const worker = workerDoc.data() as User;
+      console.log('Worker found:', worker.displayName);
+
+      // Check if user has already applied
+      const hasApplied = await this.hasUserApplied(jobId, workerId);
+      if (hasApplied) {
+        throw new Error('Du har allerede søkt på denne jobben');
+      }
+
+      // Create application
+      const applicationData: Omit<JobApplication, 'id' | 'createdAt'> = {
+        jobId,
+        workerId,
+        worker,
+        status: 'pending',
+        message: message || 'Jeg er interessert i denne jobben',
+      };
+
+      console.log('Creating application with data:', applicationData);
+
+      const docRef = await addDoc(collection(db, 'jobApplications'), {
+        ...applicationData,
+        createdAt: serverTimestamp(),
+      });
+
+      console.log('Application created with ID:', docRef.id);
+
+      // Update job with new applicant
+      await updateDoc(doc(db, 'jobs', jobId), {
+        applicants: [...(job.applicants || []), workerId],
+        updatedAt: serverTimestamp(),
+      });
+
+      // Send notification to employer
+      try {
+        await NotificationService.notifyJobApplication(
+          job.employerId,
+          worker.displayName,
+          job.title,
+          jobId
+        );
+        console.log('Notification sent to employer');
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        // Don't fail the application if notification fails
+      }
+
+      return docRef.id;
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      throw error;
     }
-    
-    const job = jobDoc.data() as Job;
-    
-    // Get worker details
-    const workerDoc = await getDoc(doc(db, 'users', workerId));
-    if (!workerDoc.exists()) {
-      throw new Error('Worker not found');
-    }
-    
-    const worker = workerDoc.data() as User;
-
-    // Create application
-    const applicationData: Omit<JobApplication, 'id' | 'createdAt'> = {
-      jobId,
-      workerId,
-      worker,
-      status: 'pending',
-      message: message || '',
-    };
-
-    const docRef = await addDoc(collection(db, 'jobApplications'), {
-      ...applicationData,
-      createdAt: serverTimestamp(),
-    });
-
-    // Send notification to employer
-    await NotificationService.notifyJobApplication(
-      job.employerId,
-      worker.displayName,
-      job.title,
-      jobId
-    );
-
-    return docRef.id;
   }
 
   // Get applications for a job

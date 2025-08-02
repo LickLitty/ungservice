@@ -119,7 +119,7 @@ const CreateJobForm: React.FC = () => {
       const { address, ...jobDataWithoutAddress } = data;
       console.log('Form data without address:', jobDataWithoutAddress);
       console.log('Address from form:', address);
-      
+
       const jobData = {
         title: data.title, // Use form data for title
         description: data.description, // Use form data for description
