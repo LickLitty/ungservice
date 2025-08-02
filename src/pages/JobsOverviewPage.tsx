@@ -2,21 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { NotificationService } from '../services/notificationService';
-import JobCard from '../components/jobs/JobCard';
-import { Job, JobApplication } from '../types';
-import { Briefcase, Filter, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { Job, JobCategory } from '../types';
+import { JobCard } from '../components/jobs/JobCard';
 import toast from 'react-hot-toast';
 
 const JobsOverviewPage: React.FC = () => {
   const { currentUser } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [applyingJobs, setApplyingJobs] = useState<Set<string>>(new Set());
-
-
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -35,175 +30,143 @@ const JobsOverviewPage: React.FC = () => {
     if (!currentUser) return;
     
     try {
-      // In a real app, this would fetch from Firebase
-      const userApplications: JobApplication[] = [];
-      setApplications(userApplications);
+      // Load user's applications to show status
+      // This would be implemented with JobService
     } catch (error) {
-      console.error('Error loading applications:', error);
+      console.error('Error loading user applications:', error);
     }
   }, [currentUser]);
 
   useEffect(() => {
     loadJobs();
+  }, [loadJobs]);
+
+  useEffect(() => {
     if (currentUser) {
       loadUserApplications();
     }
-  }, [currentUser, loadJobs, loadUserApplications]);
-
-  const handleApply = async (jobId: string) => {
-    if (!currentUser) {
-      toast.error('Du må være innlogget for å søke på jobber');
-      return;
-    }
-
-    if (currentUser.role !== 'worker') {
-      toast.error('Kun arbeidstakere kan søke på jobber');
-      return;
-    }
-
-    setApplyingJobs(prev => new Set(prev).add(jobId));
-    
-    try {
-      // Apply for the job
-      await JobService.applyForJob(jobId, currentUser.id);
-      
-      // Send notification to employer
-      const job = jobs.find(j => j.id === jobId);
-      if (job) {
-        await NotificationService.notifyJobApplication(
-          job.employerId,
-          currentUser.displayName,
-          job.title,
-          jobId
-        );
-      }
-      
-      toast.success('Søknad sendt! Arbeidsgiveren vil bli varslet.');
-    } catch (error: any) {
-      console.error('Error applying for job:', error);
-      toast.error('Kunne ikke sende søknad: ' + error.message);
-    } finally {
-      setApplyingJobs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
-      });
-    }
-  };
+  }, [currentUser, loadUserApplications]);
 
   const filteredJobs = jobs.filter(job => {
-    const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || job.categories.includes(selectedCategory as JobCategory);
     const matchesLocation = !selectedLocation || job.location.address.toLowerCase().includes(selectedLocation.toLowerCase());
     return matchesCategory && matchesLocation;
   });
 
   const categories = [
     { value: 'all', label: 'Alle kategorier' },
-    { value: 'grass-cutting', label: 'Gressklipping' },
+    { value: 'grass-cutting', label: 'Klippe gress' },
+    { value: 'weed-removal', label: 'Fjerne ugress' },
+    { value: 'bark-soil', label: 'Legge bark eller ny jord' },
+    { value: 'hedge-trimming', label: 'Klippe hekk' },
+    { value: 'trash-removal', label: 'Kjøre søppel' },
+    { value: 'washing', label: 'Spyle' },
+    { value: 'cleaning', label: 'Rengjøre' },
+    { value: 'window-washing', label: 'Vaske vinduer' },
+    { value: 'carrying', label: 'Bærejobb' },
+    { value: 'painting', label: 'Male' },
+    { value: 'staining', label: 'Beise' },
+    { value: 'repair', label: 'Reparere' },
+    { value: 'tidying', label: 'Rydde' },
+    { value: 'car-washing', label: 'Vaske bilen' },
     { value: 'snow-shoveling', label: 'Snømåking' },
-    { value: 'gardening', label: 'Hagearbeid' },
-    { value: 'cleaning', label: 'Rydding' },
-    { value: 'painting', label: 'Maling' },
-    { value: 'moving', label: 'Flytting' },
+    { value: 'moving-help', label: 'Hjelpe med flytting' },
+    { value: 'salt-sand', label: 'Strø med sand / salt' },
+    { value: 'pet-sitting', label: 'Dyrepass' },
+    { value: 'other', label: 'Annet' },
   ];
 
   const locations = ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Tromsø'];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Laster jobber...</p>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-lg p-6">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Alle tilgjengelige jobber</h1>
-            <p className="text-gray-600">Finn spennende oppdrag i ditt område</p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Alle jobber</h1>
+        <p className="text-gray-600">Finn jobber som passer deg</p>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Category Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Kategori
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              {categories.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Location Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Lokasjon
+            </label>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Alle lokasjoner</option>
+              {locations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Location Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Lokasjon</label>
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="">Alle steder</option>
-                {locations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Results Count */}
-            <div className="flex items-end">
-              <div className="flex items-center text-gray-600">
-                <Briefcase className="h-5 w-5 mr-2" />
-                <span className="font-medium">{filteredJobs.length} jobber funnet</span>
-              </div>
-            </div>
+      {/* Jobs Grid */}
+      {filteredJobs.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+            </svg>
           </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Ingen jobber funnet</h3>
+          <p className="text-gray-500">
+            Det er ingen jobber som matcher dine kriterier akkurat nå.
+          </p>
         </div>
-
-        {/* Jobs Grid */}
-        {filteredJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Ingen jobber funnet</h3>
-            <p className="text-gray-500">
-              Prøv å endre filtrene eller sjekk tilbake senere for nye jobber.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                showApplyButton={currentUser?.role === 'worker'}
-                onApply={handleApply}
-                isApplied={applications.some(app => app.jobId === job.id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredJobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

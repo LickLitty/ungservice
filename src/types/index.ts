@@ -28,7 +28,7 @@ export interface Job {
   id: string;
   title: string;
   description: string;
-  category: JobCategory;
+  categories: JobCategory[]; // Changed from single category to array
   location: {
     address: string;
     coordinates: {
@@ -37,25 +37,36 @@ export interface Job {
     };
   };
   date: Date;
-  duration: number; // in hours
-  wage: number; // per hour
+  duration: number;
+  wage: number;
   employerId: string;
   employer: User;
   status: 'open' | 'in-progress' | 'completed' | 'cancelled';
-  applicants: string[]; // user IDs
-  assignedWorker?: string;
+  applicants: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type JobCategory = 
-  | 'grass-cutting'
-  | 'snow-shoveling'
-  | 'gardening'
-  | 'cleaning'
-  | 'painting'
-  | 'moving'
-  | 'other';
+  | 'grass-cutting'           // 🌿 Klippe gress
+  | 'weed-removal'           // 🌱 Fjerne ugress
+  | 'bark-soil'              // 🪴 Legge bark eller ny jord
+  | 'hedge-trimming'         // 🌳 Klippe hekk
+  | 'trash-removal'          // 🗑️ Kjøre søppel
+  | 'washing'                // 💦 Spyle
+  | 'cleaning'               // 🧹 Rengjøre
+  | 'window-washing'         // 🪟 Vaske vinduer
+  | 'carrying'               // 💪 Bærejobb
+  | 'painting'               // 🎨 Male
+  | 'staining'               // 🪵 Beise
+  | 'repair'                 // 🔧 Reparere
+  | 'tidying'                // 📦 Rydde
+  | 'car-washing'            // 🚗 Vaske bilen
+  | 'snow-shoveling'         // ❄️ Snømåking
+  | 'moving-help'            // 📦 Hjelpe med flytting
+  | 'salt-sand'              // 🧂 Strø med sand / salt
+  | 'pet-sitting'            // 🐕 Dyrepass
+  | 'other';                 // ✨ Annet
 
 export interface JobApplication {
   id: string;

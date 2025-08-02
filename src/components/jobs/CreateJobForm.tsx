@@ -17,7 +17,7 @@ import { JobCategory } from '../../types';
 const schema = yup.object({
   title: yup.string().min(5, 'Tittel må være minst 5 tegn').required('Tittel er påkrevd'),
   description: yup.string().min(20, 'Beskrivelse må være minst 20 tegn').required('Beskrivelse er påkrevd'),
-  category: yup.string().oneOf(['grass-cutting', 'snow-shoveling', 'gardening', 'cleaning', 'painting', 'moving', 'other'], 'Velg en kategori').required('Kategori er påkrevd'),
+  categories: yup.array().min(1, 'Velg minst én kategori').required('Kategori er påkrevd'),
   date: yup.date().min(new Date(), 'Dato må være i fremtiden').required('Dato er påkrevd'),
   time: yup.string().required('Tidspunkt er påkrevd'),
   duration: yup.number().min(0.5, 'Varighet må være minst 0.5 timer').max(24, 'Varighet kan ikke være mer enn 24 timer').required('Varighet er påkrevd'),
@@ -28,19 +28,31 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 const categories: { value: JobCategory; label: string; icon: string }[] = [
-  { value: 'grass-cutting', label: 'Gressklipping', icon: '🌱' },
+  { value: 'grass-cutting', label: 'Klippe gress', icon: '🌿' },
+  { value: 'weed-removal', label: 'Fjerne ugress', icon: '🌱' },
+  { value: 'bark-soil', label: 'Legge bark eller ny jord', icon: '🪴' },
+  { value: 'hedge-trimming', label: 'Klippe hekk', icon: '🌳' },
+  { value: 'trash-removal', label: 'Kjøre søppel', icon: '🗑️' },
+  { value: 'washing', label: 'Spyle', icon: '💦' },
+  { value: 'cleaning', label: 'Rengjøre', icon: '🧹' },
+  { value: 'window-washing', label: 'Vaske vinduer', icon: '🪟' },
+  { value: 'carrying', label: 'Bærejobb', icon: '💪' },
+  { value: 'painting', label: 'Male', icon: '🎨' },
+  { value: 'staining', label: 'Beise', icon: '🪵' },
+  { value: 'repair', label: 'Reparere', icon: '🔧' },
+  { value: 'tidying', label: 'Rydde', icon: '📦' },
+  { value: 'car-washing', label: 'Vaske bilen', icon: '🚗' },
   { value: 'snow-shoveling', label: 'Snømåking', icon: '❄️' },
-  { value: 'gardening', label: 'Hagearbeid', icon: '🌿' },
-  { value: 'cleaning', label: 'Rydding', icon: '🧹' },
-  { value: 'painting', label: 'Maling', icon: '🎨' },
-  { value: 'moving', label: 'Flytting', icon: '📦' },
-  { value: 'other', label: 'Annet', icon: '💼' },
+  { value: 'moving-help', label: 'Hjelpe med flytting', icon: '📦' },
+  { value: 'salt-sand', label: 'Strø med sand / salt', icon: '🧂' },
+  { value: 'pet-sitting', label: 'Dyrepass', icon: '🐕' },
+  { value: 'other', label: 'Annet', icon: '✨' },
 ];
 
 const CreateJobForm: React.FC = () => {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<JobCategory | ''>('');
+  const [selectedCategories, setSelectedCategories] = useState<JobCategory[]>([]);
 
   const {
     register,
@@ -88,8 +100,12 @@ const CreateJobForm: React.FC = () => {
   };
 
   const handleCategorySelect = (category: JobCategory) => {
-    setSelectedCategory(category);
-    setValue('category', category);
+    const newCategories = selectedCategories.includes(category)
+      ? selectedCategories.filter(c => c !== category)
+      : [...selectedCategories, category];
+    
+    setSelectedCategories(newCategories);
+    setValue('categories', newCategories);
   };
 
   return (
@@ -106,17 +122,17 @@ const CreateJobForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Job Title */}
+          {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              Jobbtittel
+              Tittel *
             </label>
             <input
               {...register('title')}
               type="text"
               id="title"
               className="input-field"
-              placeholder="F.eks. Gressklipping i hagen"
+              placeholder="F.eks. Hjelp med hagearbeid"
             />
             {errors.title && (
               <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
@@ -126,27 +142,27 @@ const CreateJobForm: React.FC = () => {
           {/* Category Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              Kategori
+              Kategorier *
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               {categories.map((category) => (
                 <button
                   key={category.value}
                   type="button"
                   onClick={() => handleCategorySelect(category.value)}
-                  className={`p-4 border rounded-lg text-center transition-colors ${
-                    selectedCategory === category.value
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    selectedCategories.includes(category.value)
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  <div className="text-2xl mb-2">{category.icon}</div>
-                  <div className="text-sm font-medium">{category.label}</div>
+                  <div className="text-xl mb-1">{category.icon}</div>
+                  <div className="text-xs font-medium">{category.label}</div>
                 </button>
               ))}
             </div>
-            {errors.category && (
-              <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
+            {errors.categories && (
+              <p className="text-red-500 text-sm mt-1">{errors.categories.message}</p>
             )}
           </div>
 
@@ -171,35 +187,28 @@ const CreateJobForm: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Dato
+                Dato *
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  {...register('date')}
-                  type="date"
-                  id="date"
-                  className="input-field pl-10"
-                />
-              </div>
+              <input
+                {...register('date')}
+                type="date"
+                id="date"
+                className="input-field"
+              />
               {errors.date && (
                 <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
               )}
             </div>
-
             <div>
               <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                Tidspunkt
+                Tidspunkt *
               </label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  {...register('time')}
-                  type="time"
-                  id="time"
-                  className="input-field pl-10"
-                />
-              </div>
+              <input
+                {...register('time')}
+                type="time"
+                id="time"
+                className="input-field"
+              />
               {errors.time && (
                 <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
               )}
@@ -210,42 +219,35 @@ const CreateJobForm: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                Varighet (timer)
+                Varighet (timer) *
               </label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  {...register('duration', { valueAsNumber: true })}
-                  type="number"
-                  id="duration"
-                  step="0.5"
-                  min="0.5"
-                  max="24"
-                  className="input-field pl-10"
-                  placeholder="2.5"
-                />
-              </div>
+              <input
+                {...register('duration', { valueAsNumber: true })}
+                type="number"
+                id="duration"
+                step="0.5"
+                min="0.5"
+                max="24"
+                className="input-field"
+                placeholder="2.5"
+              />
               {errors.duration && (
                 <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
               )}
             </div>
-
             <div>
               <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                Lønn (kr/timen)
+                Lønn (kr/timen) *
               </label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  {...register('wage', { valueAsNumber: true })}
-                  type="number"
-                  id="wage"
-                  min="50"
-                  max="1000"
-                  className="input-field pl-10"
-                  placeholder="150"
-                />
-              </div>
+              <input
+                {...register('wage', { valueAsNumber: true })}
+                type="number"
+                id="wage"
+                min="50"
+                max="1000"
+                className="input-field"
+                placeholder="150"
+              />
               {errors.wage && (
                 <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
               )}
@@ -255,18 +257,15 @@ const CreateJobForm: React.FC = () => {
           {/* Address */}
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse
+              Adresse *
             </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                {...register('address')}
-                type="text"
-                id="address"
-                className="input-field pl-10"
-                placeholder="Storgata 15, Oslo"
-              />
-            </div>
+            <input
+              {...register('address')}
+              type="text"
+              id="address"
+              className="input-field"
+              placeholder="F.eks. Storgata 1, Oslo"
+            />
             {errors.address && (
               <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
             )}
@@ -276,19 +275,9 @@ const CreateJobForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary w-full flex items-center justify-center"
+            className="w-full btn-primary"
           >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Publiserer jobb...
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Publiser jobb
-              </>
-            )}
+            {isLoading ? 'Publiserer...' : 'Publiser jobb'}
           </button>
         </form>
       </div>
