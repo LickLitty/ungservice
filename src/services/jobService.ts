@@ -113,38 +113,50 @@ export class JobService {
 
   // Subscribe to all jobs
   static subscribeToJobs(callback: (jobs: Job[]) => void) {
-    const q = query(
-      collection(db, 'jobs'),
-      where('status', '==', 'open'),
-      orderBy('createdAt', 'desc')
-    );
+    try {
+      console.log('Setting up job subscription...');
+      const q = query(
+        collection(db, 'jobs'),
+        where('status', '==', 'open'),
+        orderBy('createdAt', 'desc')
+      );
 
-    return onSnapshot(q, (snapshot) => {
-      const jobs: Job[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        jobs.push({
-          id: doc.id,
-          title: data.title,
-          description: data.description,
-          categories: data.categories,
-          jobType: data.jobType,
-          priceType: data.priceType,
-          requirements: data.requirements,
-          location: data.location,
-          numberOfWorkers: data.numberOfWorkers,
-          expectedDuration: data.expectedDuration,
-          wage: data.wage,
-          employerId: data.employerId,
-          employer: data.employer,
-          status: data.status,
-          applicants: data.applicants || [],
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-        } as Job);
+      return onSnapshot(q, (snapshot) => {
+        console.log('Job snapshot received:', snapshot.size, 'jobs');
+        const jobs: Job[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          jobs.push({
+            id: doc.id,
+            title: data.title,
+            description: data.description,
+            categories: data.categories,
+            jobType: data.jobType,
+            priceType: data.priceType,
+            requirements: data.requirements,
+            location: data.location,
+            numberOfWorkers: data.numberOfWorkers,
+            expectedDuration: data.expectedDuration,
+            wage: data.wage,
+            employerId: data.employerId,
+            employer: data.employer,
+            status: data.status,
+            applicants: data.applicants || [],
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
+          } as Job);
+        });
+        console.log('Processed jobs:', jobs.length);
+        callback(jobs);
+      }, (error) => {
+        console.error('Error in job subscription:', error);
+        callback([]); // Return empty array on error
       });
-      callback(jobs);
-    });
+    } catch (error) {
+      console.error('Error setting up job subscription:', error);
+      callback([]); // Return empty array on error
+      return () => {}; // Return empty unsubscribe function
+    }
   }
 
   // Accept or reject an application

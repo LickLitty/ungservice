@@ -27,6 +27,7 @@ const JobsOverviewPage: React.FC = () => {
       console.error('Error loading jobs:', error);
       toast.error('Kunne ikke laste jobber');
       setLoading(false);
+      return () => {}; // Return empty unsubscribe function
     }
   }, []);
 
