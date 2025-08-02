@@ -50,18 +50,18 @@ const HomePage: React.FC = () => {
               {currentUser ? (
                 <>
                   <Link
-                    to="/jobs/new"
-                    className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Publiser jobb
-                  </Link>
-                  <Link
                     to="/jobs"
                     className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
                   >
                     <TrendingUp className="mr-2 h-5 w-5" />
                     Se jobber
+                  </Link>
+                  <Link
+                    to="/jobs/new"
+                    className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  >
+                    <Plus className="mr-2 h-5 w-5" />
+                    Publiser jobb
                   </Link>
                 </>
               ) : (
