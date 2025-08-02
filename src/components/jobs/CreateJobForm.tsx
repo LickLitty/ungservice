@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -174,6 +174,14 @@ const CreateJobForm: React.FC = () => {
   const handleNumberOfWorkersChange = (value: number) => {
     setNumberOfWorkers(value);
   };
+
+  // Set initial form values when component mounts
+  useEffect(() => {
+    setValue('jobType', selectedJobType);
+    setValue('priceType', selectedPriceType);
+    setValue('carRequired', carRequired);
+    setValue('equipmentRequired', equipmentRequired);
+  }, [setValue, selectedJobType, selectedPriceType, carRequired, equipmentRequired]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
