@@ -92,7 +92,7 @@ const dummyMessages: Message[] = [
 
 const ChatSystem: React.FC = () => {
   const { currentUser } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>(dummyConversations);
+  const [conversations] = useState<Conversation[]>(dummyConversations);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const [newMessage, setNewMessage] = useState('');

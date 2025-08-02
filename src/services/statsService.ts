@@ -1,6 +1,5 @@
 import { collection, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Job } from '../types';
 
 export interface Stats {
   activeJobs: number;

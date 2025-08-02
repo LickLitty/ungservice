@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { JobService } from '../services/jobService';
-import { NotificationService } from '../services/notificationService';
+
 import { Job, JobCategory } from '../types';
 import JobCard from '../components/jobs/JobCard';
 import toast from 'react-hot-toast';
