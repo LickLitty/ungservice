@@ -27,10 +27,19 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const loadStats = async () => {
       try {
+        console.log('Loading stats...');
         const realStats = await StatsService.getStats();
+        console.log('Stats loaded:', realStats);
         setStats(realStats);
       } catch (error) {
         console.error('Error loading stats:', error);
+        // Set default values on error
+        setStats({
+          activeJobs: 0,
+          registeredUsers: 0,
+          completedJobs: 0,
+          averageRating: 0
+        });
       } finally {
         setStatsLoading(false);
       }

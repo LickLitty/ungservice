@@ -13,8 +13,10 @@ const JobsOverviewPage: React.FC = () => {
   const loadJobs = useCallback(() => {
     setLoading(true);
     try {
+      console.log('Loading jobs...');
       // Subscribe to jobs from Firebase
       const unsubscribe = JobService.subscribeToJobs((jobs) => {
+        console.log('Jobs loaded:', jobs.length);
         setJobs(jobs);
         setLoading(false);
       });
