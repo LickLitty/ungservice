@@ -126,17 +126,23 @@ export class JobService {
       console.log('Setting up job subscription...');
       const q = query(
         collection(db, 'jobs'),
-        where('status', '==', 'open'),
         orderBy('createdAt', 'desc')
       );
 
       return onSnapshot(q, (snapshot) => {
         console.log('Job snapshot received:', snapshot.size, 'jobs');
+        console.log('Snapshot changes:', snapshot.docChanges().map(change => ({
+          type: change.type,
+          docId: change.doc.id,
+          data: change.doc.data()
+        })));
+        
         const jobs: Job[] = [];
         snapshot.forEach((doc) => {
           try {
             const data = doc.data();
             console.log('Processing job document:', doc.id, data);
+            console.log('Job status:', data.status);
             
             // Validate required fields
             if (!data.title || !data.description || !data.categories) {
@@ -168,6 +174,7 @@ export class JobService {
           }
         });
         console.log('Processed jobs:', jobs.length);
+        console.log('Jobs statuses:', jobs.map(job => ({ id: job.id, status: job.status, title: job.title })));
         callback(jobs);
       }, (error) => {
         console.error('Error in job subscription:', error);
