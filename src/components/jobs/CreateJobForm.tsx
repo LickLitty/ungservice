@@ -423,7 +423,7 @@ const CreateJobForm: React.FC = () => {
             {/* Wage */}
             <div>
               <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                {selectedPriceType === 'hourly' ? 'Lønn (kr/timen) *' : 'Pris (kr) *'}
+                Lønn *
               </label>
               <input
                 {...register('wage', { valueAsNumber: true })}
@@ -432,7 +432,7 @@ const CreateJobForm: React.FC = () => {
                 min={selectedPriceType === 'hourly' ? 50 : 100}
                 max={selectedPriceType === 'hourly' ? 1000 : 10000}
                 className="input-field"
-                placeholder={selectedPriceType === 'hourly' ? '150' : '500'}
+                placeholder={selectedPriceType === 'hourly' ? '150 kr/timen' : '500 kr'}
               />
               {errors.wage && (
                 <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
