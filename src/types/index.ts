@@ -39,8 +39,8 @@ export interface Job {
       lng: number;
     };
   };
-  date: Date;
-  duration: number;
+  numberOfWorkers: number;
+  expectedDuration: number;
   wage: number;
   employerId: string;
   employer: User;

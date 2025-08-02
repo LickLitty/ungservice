@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
+import { JobService } from '../../services/jobService';
 import toast from 'react-hot-toast';
 import { JobCategory, JobType, PriceType } from '../../types';
 
@@ -79,18 +80,25 @@ const CreateJobForm: React.FC = () => {
       const jobData = {
         ...data,
         employerId: currentUser.id,
+        employer: {
+          id: currentUser.id,
+          displayName: currentUser.displayName,
+          rating: currentUser.rating || 0,
+        },
+        numberOfWorkers,
+        expectedDuration,
         status: 'open' as const,
         applicants: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      // TODO: Save to Firestore
-      console.log('Creating job:', jobData);
+      // Save to Firestore
+      const jobId = await JobService.createJob(jobData);
       
       toast.success('Jobb publisert!');
-      // Redirect to jobs page or dashboard
-      window.location.href = '/#/dashboard';
+      // Redirect to jobs overview page
+      window.location.href = '/#/jobs';
     } catch (error: any) {
       toast.error('Kunne ikke publisere jobb: ' + error.message);
     } finally {

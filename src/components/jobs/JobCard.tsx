@@ -256,18 +256,25 @@ const JobCard: React.FC<JobCardProps> = ({
             <MapPin className="h-4 w-4 mr-2" />
             <span className="line-clamp-1">{job.location.address}</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Calendar className="h-4 w-4 mr-2" />
-            <span>{formatDate(job.date)} kl. {formatTime(job.date)}</span>
-          </div>
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center text-gray-600">
               <Clock className="h-4 w-4 mr-2" />
-              <span>{job.duration} timer</span>
+              <span>{job.expectedDuration} timer</span>
             </div>
+            <div className="flex items-center text-gray-600">
+              <User className="h-4 w-4 mr-2" />
+              <span>{job.numberOfWorkers} {job.numberOfWorkers === 1 ? 'arbeider' : 'arbeidere'}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-sm">
             <div className="flex items-center font-semibold text-primary-600">
               <DollarSign className="h-4 w-4 mr-1" />
-              <span>{job.wage} kr/timen</span>
+              <span>
+                {job.priceType === 'hourly' 
+                  ? `${job.wage} kr/timen${job.numberOfWorkers > 1 ? ' per arbeider' : ''}`
+                  : `${job.wage} kr${job.numberOfWorkers > 1 ? ' fordelt' : ''}`
+                }
+              </span>
             </div>
           </div>
         </div>

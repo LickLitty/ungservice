@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-
+import { JobService } from '../services/jobService';
 import { Job, JobCategory } from '../types';
 import JobCard from '../components/jobs/JobCard';
 import toast from 'react-hot-toast';
@@ -15,8 +15,13 @@ const JobsOverviewPage: React.FC = () => {
   const loadJobs = useCallback(async () => {
     setLoading(true);
     try {
-      // In a real app, this would fetch from Firebase
-      setJobs([]);
+      // Subscribe to jobs from Firebase
+      const unsubscribe = JobService.subscribeToJobs((jobs) => {
+        setJobs(jobs);
+      });
+      
+      // Return unsubscribe function for cleanup
+      return unsubscribe;
     } catch (error) {
       console.error('Error loading jobs:', error);
       toast.error('Kunne ikke laste jobber');
@@ -37,7 +42,12 @@ const JobsOverviewPage: React.FC = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    loadJobs();
+    const unsubscribe = loadJobs();
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [loadJobs]);
 
   useEffect(() => {

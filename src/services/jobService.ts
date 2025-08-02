@@ -16,6 +16,16 @@ import { Job, JobApplication, User } from '../types';
 import { NotificationService } from './notificationService';
 
 export class JobService {
+  // Create a new job
+  static async createJob(jobData: Omit<Job, 'id'>): Promise<string> {
+    const docRef = await addDoc(collection(db, 'jobs'), {
+      ...jobData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  }
+
   // Apply for a job
   static async applyForJob(jobId: string, workerId: string, message?: string): Promise<string> {
     // Get job details
@@ -98,6 +108,28 @@ export class JobService {
         } as JobApplication);
       });
       callback(applications);
+    });
+  }
+
+  // Subscribe to all jobs
+  static subscribeToJobs(callback: (jobs: Job[]) => void) {
+    const q = query(
+      collection(db, 'jobs'),
+      where('status', '==', 'open'),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const jobs: Job[] = [];
+      snapshot.forEach((doc) => {
+        jobs.push({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        } as Job);
+      });
+      callback(jobs);
     });
   }
 
