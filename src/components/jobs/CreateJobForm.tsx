@@ -84,9 +84,33 @@ const CreateJobForm: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     console.log('Form submitted with data:', data);
     console.log('Current user:', currentUser);
+    console.log('Local state - expectedDuration:', expectedDuration);
+    console.log('Local state - wage:', wage);
+    console.log('Local state - numberOfWorkers:', numberOfWorkers);
+    console.log('Local state - selectedCategories:', selectedCategories);
+    console.log('Local state - selectedJobType:', selectedJobType);
+    console.log('Local state - selectedPriceType:', selectedPriceType);
+    console.log('Local state - carRequired:', carRequired);
+    console.log('Local state - equipmentRequired:', equipmentRequired);
     
     if (!currentUser) {
       toast.error('Du må være innlogget for å publisere jobber');
+      return;
+    }
+
+    // Validate required fields
+    if (selectedCategories.length === 0) {
+      toast.error('Du må velge minst én kategori');
+      return;
+    }
+
+    if (expectedDuration <= 0) {
+      toast.error('Du må angi forventet varighet');
+      return;
+    }
+
+    if (wage <= 0) {
+      toast.error('Du må angi lønn');
       return;
     }
 
@@ -95,7 +119,12 @@ const CreateJobForm: React.FC = () => {
       const { address, ...jobDataWithoutAddress } = data;
       const jobData = {
         ...jobDataWithoutAddress,
-        wage: data.wage || wage, // Use form data or local state
+        categories: selectedCategories, // Use local state instead of form data
+        jobType: selectedJobType, // Use local state instead of form data
+        priceType: selectedPriceType, // Use local state instead of form data
+        wage: wage, // Use local state instead of form data
+        carRequired: carRequired, // Use local state instead of form data
+        equipmentRequired: equipmentRequired, // Use local state instead of form data
         employerId: currentUser.id,
         employer: {
           id: currentUser.id,
