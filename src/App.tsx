@@ -21,7 +21,12 @@ import JobsOverviewPage from './pages/JobsOverviewPage';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, firebaseUser, loading } = useAuth();
   
+  console.log('ProtectedRoute - currentUser:', currentUser);
+  console.log('ProtectedRoute - firebaseUser:', firebaseUser);
+  console.log('ProtectedRoute - loading:', loading);
+  
   if (loading) {
+    console.log('ProtectedRoute - showing loading spinner');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
@@ -30,14 +35,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
   
   if (!currentUser) {
+    console.log('ProtectedRoute - redirecting to login');
     return <Navigate to="/login" />;
   }
 
   // Check if email is verified for certain routes
   if (firebaseUser && !firebaseUser.emailVerified) {
+    console.log('ProtectedRoute - redirecting to email verification');
     return <Navigate to="/verify-email" />;
   }
   
+  console.log('ProtectedRoute - showing protected content');
   return <>{children}</>;
 };
 

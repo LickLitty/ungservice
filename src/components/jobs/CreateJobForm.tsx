@@ -188,36 +188,36 @@ const CreateJobForm: React.FC = () => {
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Publiser ny jobb</h1>
-          
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 Tittel *
-              </label>
-              <input
-                {...register('title')}
-                type="text"
-                id="title"
-                className="input-field"
+            </label>
+            <input
+              {...register('title')}
+              type="text"
+              id="title"
+              className="input-field"
                 placeholder="F.eks. Klippe gress i hagen"
-              />
-              {errors.title && (
-                <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
-              )}
-            </div>
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            )}
+          </div>
 
             {/* Categories */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
                 Kategorier *
-              </label>
+            </label>
               <div className="grid grid-cols-4 gap-3">
-                {categories.map((category) => (
-                  <button
-                    key={category.value}
-                    type="button"
-                    onClick={() => handleCategorySelect(category.value)}
+              {categories.map((category) => (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => handleCategorySelect(category.value)}
                     className={`p-3 border rounded-lg text-center transition-colors ${
                       selectedCategories.includes(category.value)
                         ? 'border-primary-500 bg-primary-50 text-primary-700'
@@ -515,33 +515,33 @@ const CreateJobForm: React.FC = () => {
                 <p className="text-red-500 text-sm mt-1">
                   {errors.carRequired?.message || errors.equipmentRequired?.message}
                 </p>
-              )}
-            </div>
+            )}
+          </div>
 
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Beskrivelse
-              </label>
-              <textarea
-                {...register('description')}
-                id="description"
-                rows={4}
-                className="input-field"
-                placeholder="Beskriv jobben i detalj. Hva skal gjøres? Er verktøy tilgjengelig? Spesielle krav?"
-              />
-              {errors.description && (
-                <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
-              )}
-            </div>
+          {/* Description */}
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              Beskrivelse
+            </label>
+            <textarea
+              {...register('description')}
+              id="description"
+              rows={4}
+              className="input-field"
+              placeholder="Beskriv jobben i detalj. Hva skal gjøres? Er verktøy tilgjengelig? Spesielle krav?"
+            />
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+            )}
+          </div>
 
             
 
-            {/* Address */}
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                 Adresse *
-              </label>
+            </label>
               <input
                 {...register('address')}
                 type="text"
@@ -549,20 +549,20 @@ const CreateJobForm: React.FC = () => {
                 className="input-field"
                 placeholder="F.eks. Storgata 1, Oslo"
               />
-              {errors.address && (
-                <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-              )}
-            </div>
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+            )}
+          </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
               className="w-full btn-primary"
             >
               {isLoading ? 'Publiserer...' : 'Publiser jobb'}
-            </button>
-          </form>
+          </button>
+        </form>
         </div>
       </div>
     </div>
