@@ -317,18 +317,18 @@ const CreateJobForm: React.FC = () => {
                     <div className="text-lg mb-1">🔧</div>
                     <div className="text-sm font-medium">Ja</div>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEquipmentRequiredSelect('some')}
-                    className={`p-3 border rounded-lg text-center transition-colors ${
-                      equipmentRequired === 'some'
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="text-lg mb-1">⚠️</div>
-                    <div className="text-sm font-medium">Deler</div>
-                  </button>
+                                     <button
+                     type="button"
+                     onClick={() => handleEquipmentRequiredSelect('some')}
+                     className={`p-3 border rounded-lg text-center transition-colors ${
+                       equipmentRequired === 'some'
+                         ? 'border-primary-500 bg-primary-50 text-primary-700'
+                         : 'border-gray-300 hover:border-gray-400'
+                     }`}
+                   >
+                     <div className="text-lg mb-1">⚠️</div>
+                     <div className="text-sm font-medium">Noe utstyr</div>
+                   </button>
                   <button
                     type="button"
                     onClick={() => handleEquipmentRequiredSelect('no')}
