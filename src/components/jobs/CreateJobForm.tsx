@@ -15,8 +15,6 @@ const createSchema = (priceType: PriceType) => yup.object({
   priceType: yup.string().oneOf(['hourly', 'fixed'], 'Velg prisetype').required('Prisetype er påkrevd'),
   carRequired: yup.boolean().required('Velg om bil kreves'),
   equipmentRequired: yup.string().oneOf(['yes', 'some', 'no'], 'Velg utstyrsbehov').required('Utstyrsbehov er påkrevd'),
-  date: yup.date().min(new Date(), 'Dato må være i fremtiden').required('Dato er påkrevd'),
-  time: yup.string().required('Tidspunkt er påkrevd'),
   wage: priceType === 'hourly' 
     ? yup.number().min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd')
     : yup.number().min(100, 'Pris må være minst 100 kr').max(10000, 'Pris kan ikke være mer enn 10 000 kr').required('Pris er påkrevd'),
@@ -77,14 +75,8 @@ const CreateJobForm: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Combine date and time
-      const [hours, minutes] = data.time.split(':');
-      const jobDate = new Date(data.date);
-      jobDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
       const jobData = {
         ...data,
-        date: jobDate,
         employerId: currentUser.id,
         status: 'open' as const,
         applicants: [],
@@ -438,37 +430,7 @@ const CreateJobForm: React.FC = () => {
               )}
             </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                  Dato *
-                </label>
-                <input
-                  {...register('date')}
-                  type="date"
-                  id="date"
-                  className="input-field"
-                />
-                {errors.date && (
-                  <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                  Tidspunkt *
-                </label>
-                <input
-                  {...register('time')}
-                  type="time"
-                  id="time"
-                  className="input-field"
-                />
-                {errors.time && (
-                  <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
-                )}
-              </div>
-            </div>
+            
 
             {/* Address */}
             <div>
