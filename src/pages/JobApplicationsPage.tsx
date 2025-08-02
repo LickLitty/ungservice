@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { JobApplication, Job } from '../types';
-import { Check, X, Clock, User, Calendar, DollarSign } from 'lucide-react';
+import { Check, X, Clock, User, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const JobApplicationsPage: React.FC = () => {

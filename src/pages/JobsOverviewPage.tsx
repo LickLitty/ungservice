@@ -30,17 +30,6 @@ const JobsOverviewPage: React.FC = () => {
     }
   }, []);
 
-  const loadUserApplications = useCallback(async () => {
-    if (!currentUser) return;
-    
-    try {
-      // Load user's applications to show status
-      // This would be implemented with JobService
-    } catch (error) {
-      console.error('Error loading user applications:', error);
-    }
-  }, [currentUser]);
-
   useEffect(() => {
     const unsubscribe = loadJobs();
     return () => {
@@ -49,12 +38,6 @@ const JobsOverviewPage: React.FC = () => {
       }
     };
   }, [loadJobs]);
-
-  useEffect(() => {
-    if (currentUser) {
-      loadUserApplications();
-    }
-  }, [currentUser, loadUserApplications]);
 
   const filteredJobs = jobs.filter(job => {
     const matchesCategory = selectedCategory === 'all' || job.categories.includes(selectedCategory as JobCategory);

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewService } from '../../services/reviewService';
-import { User, Review, Job } from '../../types';
-import { Star, MapPin, Calendar, Clock, DollarSign, Briefcase, Edit } from 'lucide-react';
+import { User as UserType, Review, Job } from '../../types';
+import { Star, MapPin, Calendar, Clock, DollarSign, Briefcase, Edit, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -12,7 +12,7 @@ import ProfileEditForm from './ProfileEditForm';
 const UserProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const { currentUser } = useAuth();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewStats, setReviewStats] = useState<{
     averageRating: number;
@@ -60,7 +60,7 @@ const UserProfile: React.FC = () => {
     }
   }, [userId, loadUserProfile]);
 
-  const handleSaveProfile = async (updatedUser: Partial<User>) => {
+  const handleSaveProfile = async (updatedUser: Partial<UserType>) => {
     if (!currentUser) return;
     
     try {
