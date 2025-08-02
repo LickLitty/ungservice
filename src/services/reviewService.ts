@@ -7,12 +7,11 @@ import {
   onSnapshot, 
   getDocs,
   doc,
-  getDoc,
   updateDoc,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Review, User, Job } from '../types';
+import { Review } from '../types';
 
 export class ReviewService {
   // Create a new review

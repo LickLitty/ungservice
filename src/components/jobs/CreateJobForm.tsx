@@ -8,13 +8,11 @@ import {
   Clock, 
   DollarSign, 
   MapPin, 
-  FileText, 
-  Tag,
   Plus,
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Job, JobCategory } from '../../types';
+import { JobCategory } from '../../types';
 
 const schema = yup.object({
   title: yup.string().min(5, 'Tittel må være minst 5 tegn').required('Tittel er påkrevd'),
@@ -48,7 +46,6 @@ const CreateJobForm: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     setValue,
   } = useForm<FormData>({
     resolver: yupResolver(schema),

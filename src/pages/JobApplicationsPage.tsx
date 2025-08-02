@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { JobApplication, Job } from '../types';
@@ -87,13 +87,7 @@ const JobApplicationsPage: React.FC = () => {
     }
   ];
 
-  useEffect(() => {
-    if (currentUser && currentUser.role === 'employer') {
-      loadApplications();
-    }
-  }, [currentUser, loadApplications]);
-
-  const loadApplications = async () => {
+  const loadApplications = useCallback(async () => {
     setLoading(true);
     try {
       // In a real app, this would fetch from Firebase
@@ -105,7 +99,13 @@ const JobApplicationsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'employer') {
+      loadApplications();
+    }
+  }, [currentUser, loadApplications]);
 
   const handleApplicationAction = async (applicationId: string, action: 'accept' | 'reject') => {
     try {

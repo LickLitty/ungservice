@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewService } from '../../services/reviewService';
@@ -24,13 +24,7 @@ const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'jobs'>('overview');
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadUserProfile();
-    }
-  }, [userId, loadUserProfile]);
-
-  const loadUserProfile = async () => {
+  const loadUserProfile = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -58,7 +52,13 @@ const UserProfile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadUserProfile();
+    }
+  }, [userId, loadUserProfile]);
 
   const handleSaveProfile = async (updatedUser: Partial<User>) => {
     if (!currentUser) return;

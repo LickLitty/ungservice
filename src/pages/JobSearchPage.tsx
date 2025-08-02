@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { NotificationService } from '../services/notificationService';
@@ -15,7 +15,7 @@ const JobSearchPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [loading, setLoading] = useState(true);
-
+  const [applyingJobs, setApplyingJobs] = useState<Set<string>>(new Set());
 
   // Dummy jobs data (in a real app, this would come from Firebase)
   const dummyJobs: Job[] = [
@@ -161,14 +161,7 @@ const JobSearchPage: React.FC = () => {
     }
   ];
 
-  useEffect(() => {
-    loadJobs();
-    if (currentUser) {
-      loadUserApplications();
-    }
-  }, [currentUser, loadJobs, loadUserApplications]);
-
-  const loadJobs = async () => {
+  const loadJobs = useCallback(async () => {
     setLoading(true);
     try {
       // In a real app, this would fetch from Firebase
@@ -179,9 +172,9 @@ const JobSearchPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadUserApplications = async () => {
+  const loadUserApplications = useCallback(async () => {
     if (!currentUser) return;
     
     try {
@@ -191,7 +184,14 @@ const JobSearchPage: React.FC = () => {
     } catch (error) {
       console.error('Error loading applications:', error);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    loadJobs();
+    if (currentUser) {
+      loadUserApplications();
+    }
+  }, [currentUser, loadJobs, loadUserApplications]);
 
   const handleApply = async (jobId: string) => {
     if (!currentUser) {

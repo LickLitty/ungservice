@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { JobService } from '../../services/jobService';
@@ -23,20 +23,20 @@ const JobCard: React.FC<JobCardProps> = ({
   const [applicationStatus, setApplicationStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
   const [isApplying, setIsApplying] = useState(false);
 
-  useEffect(() => {
-    if (currentUser && currentUser.role === 'worker') {
-      checkApplicationStatus();
-    }
-  }, [currentUser, job.id, checkApplicationStatus]);
-
-  const checkApplicationStatus = async () => {
+  const checkApplicationStatus = useCallback(async () => {
     try {
       const status = await JobService.getApplicationStatus(job.id, currentUser!.id);
       setApplicationStatus(status);
     } catch (error) {
       console.error('Error checking application status:', error);
     }
-  };
+  }, [currentUser, job.id]);
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'worker') {
+      checkApplicationStatus();
+    }
+  }, [currentUser, job.id, checkApplicationStatus]);
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('nb-NO', {
       day: 'numeric',

@@ -10,7 +10,7 @@ import {
   getDocs,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db, messaging, requestNotificationPermission } from '../config/firebase';
+import { db, requestNotificationPermission } from '../config/firebase';
 import { Notification } from '../types';
 
 export class NotificationService {

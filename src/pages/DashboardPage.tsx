@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Job, JobApplication } from '../types';
 import JobCard from '../components/jobs/JobCard';
@@ -6,13 +6,10 @@ import {
   Briefcase, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   Plus,
   TrendingUp,
   Star,
-  Calendar,
-  MapPin,
-  DollarSign
+  Calendar
 } from 'lucide-react';
 
 // Dummy data for demonstration
@@ -100,8 +97,8 @@ const dummyApplications: JobApplication[] = [
 const DashboardPage: React.FC = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'my-jobs' | 'applications' | 'booked'>('overview');
-  const [userJobs, setUserJobs] = useState<Job[]>(dummyUserJobs);
-  const [applications, setApplications] = useState<JobApplication[]>(dummyApplications);
+  const [userJobs] = useState<Job[]>(dummyUserJobs);
+  const [applications] = useState<JobApplication[]>(dummyApplications);
 
   const stats = [
     { label: 'Jobber publisert', value: userJobs.length, icon: Briefcase, color: 'text-blue-600' },
