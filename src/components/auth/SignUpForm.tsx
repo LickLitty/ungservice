@@ -149,11 +149,7 @@ const SignUpForm: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Tips:</strong> Du kan endre din rolle (arbeidsgiver/arbeidstaker) senere i profilinnstillingene.
-            </p>
-          </div>
+
 
           <button
             type="submit"
