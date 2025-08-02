@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+
 import { User } from '../../types';
 import { Save, X, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';

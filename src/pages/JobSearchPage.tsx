@@ -4,7 +4,7 @@ import { JobService } from '../services/jobService';
 import { NotificationService } from '../services/notificationService';
 import JobCard from '../components/jobs/JobCard';
 import { Job, JobApplication } from '../types';
-import { Search, Filter, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const JobSearchPage: React.FC = () => {
@@ -15,7 +15,7 @@ const JobSearchPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [applyingJobs, setApplyingJobs] = useState<Set<string>>(new Set());
+
 
   // Dummy jobs data (in a real app, this would come from Firebase)
   const dummyJobs: Job[] = [
@@ -166,7 +166,7 @@ const JobSearchPage: React.FC = () => {
     if (currentUser) {
       loadUserApplications();
     }
-  }, [currentUser]);
+  }, [currentUser, loadJobs, loadUserApplications]);
 
   const loadJobs = async () => {
     setLoading(true);

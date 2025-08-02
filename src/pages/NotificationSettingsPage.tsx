@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { Bell, MessageSquare, Briefcase, Clock, Settings } from 'lucide-react';
-import toast from 'react-hot-toast';
+
 
 const NotificationSettingsPage: React.FC = () => {
   const { requestPermission } = useNotifications();

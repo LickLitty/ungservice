@@ -188,7 +188,7 @@ const dummyJobs: Job[] = [
 
 const HomePage: React.FC = () => {
   const { currentUser } = useAuth();
-  const [featuredJobs, setFeaturedJobs] = useState<Job[]>(dummyJobs);
+  const [featuredJobs] = useState<Job[]>(dummyJobs);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { JobService } from '../services/jobService';
 import { JobApplication, Job } from '../types';
-import { Check, X, Clock, User, Calendar, MapPin, DollarSign } from 'lucide-react';
+import { Check, X, Clock, User, Calendar, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const JobApplicationsPage: React.FC = () => {
@@ -91,7 +91,7 @@ const JobApplicationsPage: React.FC = () => {
     if (currentUser && currentUser.role === 'employer') {
       loadApplications();
     }
-  }, [currentUser]);
+  }, [currentUser, loadApplications]);
 
   const loadApplications = async () => {
     setLoading(true);
@@ -109,13 +109,14 @@ const JobApplicationsPage: React.FC = () => {
 
   const handleApplicationAction = async (applicationId: string, action: 'accept' | 'reject') => {
     try {
-      await JobService.updateApplicationStatus(applicationId, action);
+      const status = action === 'accept' ? 'accepted' : 'rejected';
+      await JobService.updateApplicationStatus(applicationId, status);
       
       // Update local state
       setApplications(prev => 
         prev.map(app => 
           app.id === applicationId 
-            ? { ...app, status: action === 'accept' ? 'accepted' : 'rejected' }
+            ? { ...app, status }
             : app
         )
       );

@@ -27,7 +27,7 @@ const JobCard: React.FC<JobCardProps> = ({
     if (currentUser && currentUser.role === 'worker') {
       checkApplicationStatus();
     }
-  }, [currentUser, job.id]);
+  }, [currentUser, job.id, checkApplicationStatus]);
 
   const checkApplicationStatus = async () => {
     try {

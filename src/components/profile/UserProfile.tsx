@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewService } from '../../services/reviewService';
 import { User, Review, Job } from '../../types';
-import { Star, MapPin, Calendar, Clock, DollarSign, MessageSquare, Briefcase, Edit } from 'lucide-react';
+import { Star, MapPin, Calendar, Clock, DollarSign, Briefcase, Edit } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -19,7 +19,7 @@ const UserProfile: React.FC = () => {
     totalReviews: number;
     ratingDistribution: { [key: number]: number };
   } | null>(null);
-  const [completedJobs, setCompletedJobs] = useState<Job[]>([]);
+  const [completedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'jobs'>('overview');
   const [isEditing, setIsEditing] = useState(false);
@@ -28,7 +28,7 @@ const UserProfile: React.FC = () => {
     if (userId) {
       loadUserProfile();
     }
-  }, [userId]);
+  }, [userId, loadUserProfile]);
 
   const loadUserProfile = async () => {
     try {

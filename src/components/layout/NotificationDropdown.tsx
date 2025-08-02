@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotifications } from '../../contexts/NotificationContext';
-import { Bell, Check, X, MessageSquare, Briefcase, Clock } from 'lucide-react';
+import { Bell, MessageSquare, Briefcase, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 
