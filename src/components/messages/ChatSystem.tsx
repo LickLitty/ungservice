@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const ChatSystem: React.FC = () => {
   const { currentUser } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
