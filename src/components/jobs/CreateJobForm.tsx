@@ -17,7 +17,6 @@ const createSchema = (priceType: PriceType) => yup.object({
   equipmentRequired: yup.string().oneOf(['yes', 'some', 'no'], 'Velg utstyrsbehov').required('Utstyrsbehov er påkrevd'),
   date: yup.date().min(new Date(), 'Dato må være i fremtiden').required('Dato er påkrevd'),
   time: yup.string().required('Tidspunkt er påkrevd'),
-  duration: yup.number().min(0.5, 'Varighet må være minst 0.5 timer').max(24, 'Varighet kan ikke være mer enn 24 timer').required('Varighet er påkrevd'),
   wage: priceType === 'hourly' 
     ? yup.number().min(50, 'Lønn må være minst 50 kr/timen').max(1000, 'Lønn kan ikke være mer enn 1000 kr/timen').required('Lønn er påkrevd')
     : yup.number().min(100, 'Pris må være minst 100 kr').max(10000, 'Pris kan ikke være mer enn 10 000 kr').required('Pris er påkrevd'),
@@ -421,43 +420,23 @@ const CreateJobForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Duration and Wage */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                  Varighet (timer) *
-                </label>
-                <input
-                  {...register('duration', { valueAsNumber: true })}
-                  type="number"
-                  id="duration"
-                  step="0.5"
-                  min="0.5"
-                  max="24"
-                  className="input-field"
-                  placeholder="2.5"
-                />
-                {errors.duration && (
-                  <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
-                  {selectedPriceType === 'hourly' ? 'Lønn (kr/timen) *' : 'Pris (kr) *'}
-                </label>
-                <input
-                  {...register('wage', { valueAsNumber: true })}
-                  type="number"
-                  id="wage"
-                  min={selectedPriceType === 'hourly' ? 50 : 100}
-                  max={selectedPriceType === 'hourly' ? 1000 : 10000}
-                  className="input-field"
-                  placeholder={selectedPriceType === 'hourly' ? '150' : '500'}
-                />
-                {errors.wage && (
-                  <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
-                )}
-              </div>
+            {/* Wage */}
+            <div>
+              <label htmlFor="wage" className="block text-sm font-medium text-gray-700 mb-2">
+                {selectedPriceType === 'hourly' ? 'Lønn (kr/timen) *' : 'Pris (kr) *'}
+              </label>
+              <input
+                {...register('wage', { valueAsNumber: true })}
+                type="number"
+                id="wage"
+                min={selectedPriceType === 'hourly' ? 50 : 100}
+                max={selectedPriceType === 'hourly' ? 1000 : 10000}
+                className="input-field"
+                placeholder={selectedPriceType === 'hourly' ? '150' : '500'}
+              />
+              {errors.wage && (
+                <p className="text-red-500 text-sm mt-1">{errors.wage.message}</p>
+              )}
             </div>
 
             {/* Address */}
